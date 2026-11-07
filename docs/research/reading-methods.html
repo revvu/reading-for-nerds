@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en" data-theme="reading"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading Methods</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+<style>
+/* Lavish skin — DaisyUI 5 custom theme.
+   theme-name: reading
+   Identity, taken from the app itself: black words on a page, one red pivot letter.
+   - Canvas: warm paper. Ink: near-black. Primary: fountain-pen blue, for links, data and actions.
+   - Accent: the pivot red. Use it only where the page shows the reader's pivot letter or a word being read, never for errors or decoration.
+   - Error is a plum, so it never reads as the pivot.
+   Type: headings in Literata (an open-licence serif designed for long reading on screens); body in the system font, as the app's panel uses.
+   Usage: set <html lang="en" data-theme="reading"> and inline this entire file at the very top of the artifact's <style> block (inline, never <link>; the @import must stay first). */
+@import url("https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,600;7..72,700&display=swap");
+
+[data-theme="reading"] {
+  color-scheme: light;
+  background-color: #fbf9f4;
+  --color-base-100: #fbf9f4;        /* paper */
+  --color-base-200: #f3efe6;        /* paper, shaded */
+  --color-base-300: #e2dccf;        /* rules */
+  --color-base-content: #1c1b18;    /* ink */
+  --color-primary: #24477a;         /* fountain-pen blue */
+  --color-primary-content: #fbf9f4;
+  --color-secondary: #1c1b18;
+  --color-secondary-content: #fbf9f4;
+  --color-accent: #d3362b;          /* the pivot letter */
+  --color-accent-content: #fbf9f4;
+  --color-neutral: #2a2925;
+  --color-neutral-content: #fbf9f4;
+  --color-info: #3a6b8c;
+  --color-info-content: #fbf9f4;
+  --color-success: #2e7550;
+  --color-success-content: #fbf9f4;
+  --color-warning: #a46f1f;
+  --color-warning-content: #1c1b18;
+  --color-error: #8e2f4a;           /* plum, kept apart from the pivot red */
+  --color-error-content: #fbf9f4;
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+  /* Extra tokens for pages. */
+  --reading-surface: #ffffff;                                                    /* cards on the paper */
+  --reading-mute: color-mix(in oklab, #1c1b18 60%, transparent);                /* secondary text */
+  --reading-tint: color-mix(in oklab, #24477a 7%, #ffffff);                     /* a primary wash */
+  --reading-mark: color-mix(in oklab, #24477a 18%, #ffffff);                    /* a word being read, or the answer */
+  --reading-serif: "Literata", Georgia, "Times New Roman", serif;
+  --reading-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+[data-theme="reading"] body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  background-color: #fbf9f4;
+  color: #1c1b18;
+}
+[data-theme="reading"] h1, [data-theme="reading"] h2 {
+  font-family: var(--reading-serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+[data-theme="reading"] h3, [data-theme="reading"] h4 { font-weight: 600; }
+[data-theme="reading"] .card {
+  background: var(--reading-surface);
+  border: 1px solid #e2dccf;
+  box-shadow: 0 1px 2px rgba(28, 27, 24, 0.04);
+}
+[data-theme="reading"] ::selection { background: color-mix(in oklab, #24477a 22%, #ffffff); }
+
+/* page */
+/* Every colour comes from the skin's tokens. */
+:root { --mute: var(--reading-mute); --rule: var(--color-base-300); --brand: var(--color-primary); --ok: var(--color-success); --warn: var(--color-warning); --bad: var(--color-error); --pivot: var(--color-accent); --surface: var(--reading-surface); --tint: var(--reading-tint); --mark: var(--reading-mark);
+  --quiet: color-mix(in oklab, var(--color-base-content) 45%, var(--surface)); --faint: color-mix(in oklab, var(--color-base-content) 30%, var(--surface)); }
+.wrap { max-width: 980px; margin: 0 auto; padding: 32px 16px 96px; }
+section { margin-top: 64px; }
+h1 { font-size: 34px; line-height: 1.18; letter-spacing: -.005em; }
+h2 { font-size: 22px; line-height: 1.3; }
+h3 { font-size: 15.5px; }
+p, li { line-height: 1.55; }
+a { color: var(--brand); }
+.muted { color: var(--mute); }
+.eyebrow { font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+.problem { font-size:16.5px; line-height:1.55; max-width:68ch; }
+.problem b:first-child { color: var(--brand); }
+.box { border:1px solid var(--rule); border-radius:10px; background:var(--surface); padding:16px; min-width:0; }
+.lead { margin-top:6px; color: var(--mute); font-size:14.5px; max-width:72ch; }
+.prose { max-width: 70ch; }
+.prose p + p { margin-top: 10px; }
+.callout { border-left:3px solid var(--brand); background:var(--tint); padding:12px 16px; border-radius:0 8px 8px 0; }
+details { border-top:1px solid var(--rule); padding:12px 0; }
+details > summary { cursor:pointer; font-weight:600; }
+details[open] > summary { margin-bottom:8px; }
+details p, details li { font-size:14px; }
+.caption { font-size:13.5px; color: var(--mute); margin-top:8px; }
+ul.dots { list-style: disc; padding-left: 20px; }
+ul.dots li + li { margin-top: 4px; }
+
+/* hero: eye path over a line of text */
+.hero { position:relative; }
+.hero svg text { font-family: var(--reading-mono); }
+.replay { position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:99px; border:1px solid var(--rule); background:var(--surface); color:var(--mute); cursor:pointer; }
+.replay:hover { color: var(--brand); border-color: var(--brand); }
+.hero .fx, .hero .arc { opacity: 0; }
+.hero.play .fx { animation: pop .25s calc(var(--i) * .45s + .3s) both; }
+.hero.play .arc { animation: draw .3s calc(var(--i) * .45s + .15s) both; }
+.hero .arc { stroke-dasharray: 1; }
+.hero.play .bar-fix { animation: grow 1.2s 5.4s both; }
+.hero.play .bar-mov { animation: fadein .4s 6.6s both; }
+.hero.play .cut { animation: fadein .5s 7.2s both; }
+.hero .bar-fix { transform-box: fill-box; transform-origin: left; }
+@keyframes pop { from { opacity:0; transform: scale(.4); } to { opacity:1; } }
+@keyframes draw { from { opacity:1; stroke-dashoffset: 1; } to { opacity:1; stroke-dashoffset: 0; } }
+@keyframes grow { from { transform: scaleX(0); } }
+@keyframes fadein { from { opacity:0; } }
+@media (prefers-reduced-motion: reduce) { .hero .fx, .hero .arc { opacity: 1; } .hero.play * { animation: none !important; } .replay { display:none; } }
+
+/* ladder */
+.ladder { width:100%; border-collapse: collapse; font-size: 14px; }
+.ladder th { text-align:left; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); font-weight:600; padding:6px 8px; border-bottom:1px solid var(--rule); }
+.ladder td { padding:9px 8px; border-bottom:1px solid var(--rule); vertical-align: top; }
+.ladder td.n { color: var(--brand); font-weight:700; width: 28px; }
+.ladder a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--mute); }
+.ev { letter-spacing: 2px; color: var(--brand); white-space: nowrap; }
+.ev i { color: var(--rule); font-style: normal; }
+.tag { display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:999px; white-space:nowrap; }
+.tag.works { background: color-mix(in oklab, var(--color-success) 12%, var(--surface)); color: var(--color-success); }
+.tag.some { background: color-mix(in oklab, var(--color-info) 12%, var(--surface)); color: var(--color-info); }
+.tag.trade { background: color-mix(in oklab, var(--color-warning) 14%, var(--surface)); color: color-mix(in oklab, var(--color-warning) 80%, black); }
+.tag.none { background: color-mix(in oklab, var(--color-error) 12%, var(--surface)); color: var(--color-error); }
+.tag.untested { background: var(--color-base-200); color: var(--mute); }
+.up { color: var(--ok); font-weight: 600; } .down { color: var(--bad); font-weight: 600; } .flat { color: var(--mute); }
+@media (max-width: 640px) { .ladder .hide-sm { display:none; } h1 { font-size: 26px; } }
+
+/* method cards */
+.method { border:1px solid var(--rule); border-radius:12px; background:var(--surface); padding:18px; margin-top:18px; }
+.method h3 { font-size: 17px; display:flex; gap:10px; align-items: baseline; flex-wrap: wrap; }
+.method h3 .rank { color: var(--brand); }
+.grid2 { display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; margin-top: 12px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+.pc { display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; margin-top: 12px; font-size: 14px; }
+.pc > div { border-radius: 8px; padding: 10px 12px; }
+.pc .pro { background: color-mix(in oklab, var(--color-success) 8%, var(--surface)); } .pc .con { background: color-mix(in oklab, var(--color-error) 7%, var(--surface)); }
+.pc b { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
+@media (max-width: 560px) { .pc { grid-template-columns: 1fr; } }
+.study { font-size: 13.5px; }
+.study li + li { margin-top: 6px; }
+.fit { margin-top: 12px; font-size: 14px; }
+
+/* demos */
+.demo { border:1px solid var(--rule); border-radius:10px; background:var(--color-base-200); padding:12px; align-self: start; }
+.demo .controls { display:flex; gap:10px; align-items:center; flex-wrap: wrap; font-size: 13px; color: var(--mute); margin-bottom: 10px; }
+.demo button { font-size: 13px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--brand); color: var(--brand); background: var(--surface); cursor: pointer; }
+.demo button[aria-pressed="true"] { background: var(--brand); color: var(--color-primary-content); }
+.demo input[type=range] { width: 110px; accent-color: var(--brand); }
+.stage { position: relative; height: 92px; background: var(--surface); border-radius: 8px; border: 1px solid var(--rule); overflow: hidden; }
+.stage::before, .stage::after { content:""; position:absolute; left: 38%; width: 2px; height: 10px; background: var(--rule); }
+.stage::before { top: 10px; } .stage::after { bottom: 10px; }
+.stage.center::before, .stage.center::after { left: 50%; }
+.rsvp-word { position:absolute; top: 50%; left: 38%; transform: translateY(-50%); font-size: 30px; font-weight: 500; white-space: nowrap; }
+.rsvp-word .pre { position:absolute; right: 100%; }
+.rsvp-word b { color: var(--pivot); font-weight: 500; }
+.chunk { position:absolute; inset: 0; display:flex; align-items:center; justify-content:center; font-size: 26px; font-weight: 500; text-align:center; padding: 0 12px; }
+.strip { position:absolute; top: 50%; transform: translateX(100%); margin-top: -18px; font-size: 28px; white-space: nowrap; }
+.para { background:var(--surface); border:1px solid var(--rule); border-radius:8px; padding: 12px 14px; font-size: 16px; line-height: 1.6; max-width: 62ch; }
+.para span.lit { background: var(--mark); border-radius: 3px; box-shadow: 0 0 0 2px var(--mark); }
+.note { font-size: 13px; color: var(--bad); }
+
+/* decision cards */
+.decision { border:1px solid color-mix(in oklab, var(--brand) 35%, transparent); border-radius:12px; background:var(--surface); padding:18px; margin-top:16px; }
+.decision .opts { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:10px; margin-top: 12px; }
+.decision .opt { border:1px solid var(--rule); border-radius:8px; padding:10px 12px; font-size:14px; }
+.decision .opt.rec { border-color: var(--brand); background:var(--tint); }
+.decision .opt b { display:block; }
+.badge-rec { font-size: 11px; font-weight: 700; color: var(--brand); letter-spacing: .05em; text-transform: uppercase; }
+
+/* time bar */
+.timebar { display:flex; height: 34px; border-radius: 8px; overflow:hidden; font-size: 13px; color: var(--color-primary-content); }
+.timebar div { display:flex; align-items:center; padding: 0 10px; white-space: nowrap; }
+table.plain { width:100%; border-collapse: collapse; font-size: 13.5px; }
+table.plain td, table.plain th { border-bottom: 1px solid var(--rule); padding: 7px 8px; text-align: left; vertical-align: top; }
+table.plain th { font-size: 11.5px; letter-spacing:.06em; text-transform: uppercase; color: var(--mute); }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<p class="eyebrow">Reading for Nerds · research · Nov 7 · next: <a href="beyond-reading.html">Beyond reading</a>, <a href="adaptive-text.html">Adaptive text</a></p>
+<h1>No display in the studies makes reading much faster without costing comprehension: RSVP tops out near normal speed, and the best-backed gain is listening at up to 2×, roughly 20% above silent reading</h1>
+
+<!-- HERO: how the eyes really read one line, and what RSVP removes -->
+<div class="hero box mt-6 play" id="hero">
+<button class="replay" type="button" aria-label="Replay the animation" title="Replay">&#8635;</button>
+<svg id="hero-svg" viewBox="0 0 760 270" width="100%" role="img" aria-label="Eyes reading one line: they stop on most words, skip short ones, and jump back once to recheck a word. Below, a bar shows about 90% of reading time is spent stopped on words and about 10% moving. RSVP removes the moving part, and with it the jump back and the preview."></svg>
+</div>
+
+<p class="problem mt-5"><b>Problem:</b>
+We built an RSVP reader, and you want to know what else people have tried for faster screen reading, and which methods hold up in studies.
+Done is the methods ranked by measured outcomes, each with a small demo and its evidence, and what that means for our app.
+It needs two choices from you, at the end.</p>
+
+<section>
+<p class="eyebrow">1 · The words this page uses</p>
+<h2>Reading time goes into understanding words, not moving the eyes, so cutting eye movement saves little</h2>
+<div class="box mt-4">
+  <div class="timebar" aria-label="About 90% of reading time is fixations, about 10% is saccades">
+    <div style="flex:9;background:var(--brand)">Fixations: stopped on a word, about 250 ms each</div>
+    <div style="flex:1;background:var(--quiet)" title="Saccades">Jumps</div>
+  </div>
+  <p class="caption">Share of reading time, from the review by Rayner and colleagues (2016). Spritz, the 2014 app that made RSVP with a red pivot letter popular, claimed eye movement takes 80% of reading time; the review reports that claim and disputes it (figures in this review not rechecked against its full text).</p>
+</div>
+<div class="prose mt-4">
+<p>These terms carry the rest of the page.</p>
+<ul class="dots mt-2">
+<li><b>Fixation</b>: the eye stops on a word, about a quarter of a second; this is where reading happens.</li>
+<li><b>Saccade</b>: the jump to the next stop, 20 to 35 ms, about 7 letters.</li>
+<li><b>Regression</b>: a jump back; 10 to 15% of jumps, mostly to repair a misunderstanding.</li>
+<li><b>Preview</b>: the eye already takes in about 14 letters to the right of where it rests, which is why about 30% of words are skipped.</li>
+<li><b>wpm</b>: words per minute. A meta-analysis of 190 studies puts adult silent reading at 238 wpm for non-fiction and 260 for fiction.</li>
+<li><b>Meta-analysis</b>: a study that pools many studies into one estimate. <b>n</b>: the number of people tested.</li>
+<li><b>Effect size (g)</b>: a difference in standard deviations, so studies can be compared: 0.2 is small, 0.5 medium, 0.8 large. g = 0.41 means the average reader in one group beat about two thirds of the other.</li>
+<li><b>Not significant</b> (or a large p, such as p = 0.9): the difference is small enough to be chance.</li>
+</ul>
+<p>The review's conclusion follows: what limits reading speed is how fast we recognise words and build meaning, not eye control, and speed trades against understanding.</p>
+<p><b>What this means for our app:</b> if eye travel is about 10% of reading time, removing it saves at most about 10%, and RSVP also shows every word, including the ones the eye would have skipped.
+So RSVP can match normal reading but should not beat it, and the studies in method 3 agree.
+What it gives instead is reading with no eye travel, in a small window, at a pace set for you, which is also what the voice needs.
+It doesn't change what we build; it changes what to expect: the app will not make you a faster reader, but it can make reading easier to start and keep going.</p>
+</div>
+<details>
+<summary>Sources for these numbers</summary>
+<table class="plain">
+<tr><th>Fact</th><th>Source</th></tr>
+<tr><td>238 wpm non-fiction, 260 fiction; 190 studies, n = 18,573</td><td>Brysbaert 2019, <i>Journal of Memory and Language</i>, <a href="https://doi.org/10.1016/j.jml.2019.104047">doi</a></td></tr>
+<tr><td>Fixations about 250 ms, saccades 20–35 ms, eye movement about 10% of time, regressions 10–15%, about 30% of words skipped, span about 14–15 letters right</td><td>Rayner, Schotter, Masson, Potter &amp; Treiman 2016, <i>Psychological Science in the Public Interest</i>, <a href="https://doi.org/10.1177/1529100615623267">doi</a></td></tr>
+</table>
+</details>
+</section>
+
+<section>
+<p class="eyebrow">2 · The ranking</p>
+<h2>Ranked by measured outcome: listening and normal-speed RSVP hold up; tricks that promise more cost comprehension or do nothing</h2>
+<p class="lead">Sorted by speed gained at equal comprehension for adult readers; evidence breaks ties, and methods that cost comprehension or were never tested go last.
+Evidence dots: ●●● several controlled studies or a meta-analysis; ●●○ one large controlled study, or several that disagree; ●○○ one small study or children only; ○○○ none found.</p>
+<div class="box mt-4" style="overflow-x:auto">
+<table class="ladder">
+<tr><th>#</th><th>Method</th><th>Verdict</th><th>Speed</th><th>Comprehension</th><th class="hide-sm">Evidence</th><th class="hide-sm">Our app</th></tr>
+<tr><td class="n">1</td><td><a href="#m-listen">Listening, or reading while listening, at up to 2×</a></td><td><span class="tag works">Small gain</span></td><td class="up">~20% over silent</td><td class="flat">same up to 2×</td><td class="hide-sm ev">●●<i>●</i></td><td class="hide-sm">yes: V</td></tr>
+<tr><td class="n">2</td><td><a href="#m-practice">Practice while watching your own speed</a></td><td><span class="tag works">Small gain</span></td><td class="up">+35 wpm</td><td class="flat">same</td><td class="hide-sm ev">●<i>●●</i></td><td class="hide-sm">habit</td></tr>
+<tr><td class="n">3</td><td><a href="#m-rsvp">RSVP at normal speed</a></td><td><span class="tag some">No loss, no gain</span></td><td class="flat">about normal</td><td class="flat">same at 250; small losses from 300 in some tests</td><td class="hide-sm ev">●●<i>●</i></td><td class="hide-sm">yes: the app</td></tr>
+<tr><td class="n">4</td><td><a href="#m-phrase">Phrase and cascade layouts</a></td><td><span class="tag some">Unclear</span></td><td class="flat">not measured</td><td class="flat">no clear change; tiny gains in writing scores (grades 7–8)</td><td class="hide-sm ev">●●<i>●</i></td><td class="hide-sm">as a mode</td></tr>
+<tr><td class="n">5</td><td><a href="#m-type">Letter spacing and line length</a></td><td><span class="tag some">Helps some</span></td><td class="up">faster for dyslexic readers only</td><td class="flat">same</td><td class="hide-sm ev">●●<i>●</i></td><td class="hide-sm">no</td></tr>
+<tr><td class="n">6</td><td><a href="#m-skim">Skimming</a></td><td><span class="tag trade">Trades</span></td><td class="up">2–4×</td><td class="down">lower, details lost</td><td class="hide-sm ev">●●●</td><td class="hide-sm">no</td></tr>
+<tr><td class="n">7</td><td><a href="#m-fast">Speed-reading courses</a>; <a href="#m-rsvp">RSVP above ~350 wpm</a></td><td><span class="tag trade">Trades</span></td><td class="up">faster</td><td class="down">lower</td><td class="hide-sm ev">●●●</td><td class="hide-sm">↑ key</td></tr>
+<tr><td class="n">8</td><td><a href="#m-pace">Pacers, scrolling text, eye-tracking displays</a></td><td><span class="tag untested">Untested</span></td><td class="flat">unknown</td><td class="flat">unknown</td><td class="hide-sm ev"><i>●●●</i></td><td class="hide-sm">no</td></tr>
+<tr><td class="n">9</td><td><a href="#m-beeline">Colour gradients (BeeLine)</a></td><td><span class="tag untested">Untested in adults</span></td><td class="flat">mixed, children</td><td class="flat">mixed</td><td class="hide-sm ev">●<i>●●</i></td><td class="hide-sm">no</td></tr>
+<tr><td class="n">10</td><td><a href="#m-bionic">Bold word starts (Bionic Reading)</a></td><td><span class="tag none">No effect</span></td><td class="flat">no change</td><td class="flat">no change</td><td class="hide-sm ev">●●●</td><td class="hide-sm">no</td></tr>
+<tr><td class="n">—</td><td><a href="#m-fast">Suppressing inner speech</a></td><td><span class="tag none">Hurts</span></td><td class="flat">—</td><td class="down">lower</td><td class="hide-sm ev">●●<i>●</i></td><td class="hide-sm">no</td></tr>
+</table>
+</div>
+<p class="caption">Every method below has its studies under it: design, sample size where found, and the measured result. Items I could not verify are marked.</p>
+</section>
+
+<section>
+<p class="eyebrow">3 · Each method, with a demo</p>
+<h2>Each demo runs on the same passage, so you can feel the difference</h2>
+
+<div class="method" id="m-listen">
+<h3><span class="rank">1</span> Listening, or reading while listening, at up to 2× <span class="tag works">Small gain</span></h3>
+<div class="grid2">
+  <div class="demo" data-demo="listen">
+    <div class="controls"><button type="button" data-play aria-pressed="false">Play</button> voice speed <input type="range" min="0.75" max="2.5" step="0.25" value="1.5" data-rate aria-label="Voice speed"> <output data-rate-out>1.5×</output></div>
+    <div class="para"></div>
+    <p class="caption">Uses your browser's voice; each word lights up as it is spoken, like our app's V mode.</p>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> speech carries the words, so the eyes are freed or paced; synced text lets you follow along.</p>
+    <ul class="dots mt-2">
+      <li><b>Speed costs little up to 2×.</b> Over 200 students watched a 15-minute lecture at 1×, 1.5×, 2× or 2.5×: little loss up to 2×, a drop at 2.5×, tested immediately and a week later. One lecture, not dense text. <a href="https://doi.org/10.1002/acp.3899">Murphy et al. 2022</a></li>
+      <li><b>Reading while listening helps when the pace is set for you.</b> Meta-analysis of 30 studies, n = 1,945: overall g = 0.18; when the experimenter set the pace g = 0.41; self-paced g = 0.06, not significant. <a href="https://files.eric.ed.gov/fulltext/EJ1403866.pdf">Clinton-Lisell 2023</a></li>
+      <li>Listening and reading give about the same comprehension overall (46 studies, n = 4,687, g = 0.07, not significant), but reading beats listening on inference questions (g = 0.36) and when the reader sets the pace (g = 0.13). <a href="https://doi.org/10.3102/00346543211060871">Clinton-Lisell 2022, <i>Review of Educational Research</i></a></li>
+      <li><b>The working for "roughly 20%":</b> speech at 1× is about 150 wpm, so 2× is about 300 wpm (Rayner et al. 2016, not rechecked), against 238–260 wpm silent; 300 / 250 ≈ 1.2. No single study compared 2× listening with silent reading: this joins Murphy's lecture result with the reading-speed meta-analysis.</li>
+    </ul>
+  </div>
+</div>
+<div class="pc"><div class="pro"><b>Pros</b><br>The best-supported way to go above normal speed without losing comprehension. Our app already has it.</div><div class="con"><b>Cons</b><br>Caps out near 2× speech, about 300 wpm. Loses to reading on inference questions, so it suits gist more than study. No study tested RSVP plus a synced voice specifically.</div></div>
+<p class="fit"><b>In our app:</b> in V mode the voice sets the pace and the wpm setting is not used; ↑ ↓ change the voice's rate, and the footer shows the speed it reaches. V mode is the "pace set for you" case where reading while listening helped most (g = 0.41); that it carries over to RSVP is my inference, not a tested result.</p>
+</div>
+
+<div class="method" id="m-practice">
+<h3><span class="rank">2</span> Practice while watching your own speed <span class="tag works">Small gain</span></h3>
+<div class="study">
+  <p><b>How it works:</b> reading regularly while tracking your speed and checking your understanding; the gain comes from fewer, shorter fixations, not a new eye skill.</p>
+  <ul class="dots mt-2">
+    <li>30 German undergraduates: a commercial speed-reading app, a self-monitoring training, or nothing. Both trained groups gained about 35 wpm with no comprehension change. <a href="https://doi.org/10.1111/1467-9817.12417">Klimovich, Tiffin-Richards &amp; Richter 2023</a> (randomisation not verified)</li>
+  </ul>
+  <p class="caption">No demo: this is a habit, not a display.</p>
+</div>
+<div class="pc"><div class="pro"><b>Pros</b><br>Real gain with comprehension held; costs nothing.</div><div class="con"><b>Cons</b><br>One small study; about +15%, not multiples.</div></div>
+</div>
+
+<div class="method" id="m-rsvp">
+<h3><span class="rank">3</span> RSVP at normal speed <span class="tag some">No loss, no gain</span></h3>
+<div class="grid2">
+  <div class="demo" data-demo="rsvp">
+    <div class="controls"><button type="button" data-play aria-pressed="false">Play</button> <input type="range" min="200" max="900" step="50" value="300" data-wpm aria-label="Words per minute"> <output data-wpm-out>300 wpm</output></div>
+    <div class="stage"></div>
+    <p class="caption">Try 300, then 700: at 700 you see every word but keep less.</p>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> one word at a time at a fixed point; no eye jumps, but also no going back and no preview, and the machine sets the pace. Spritz (2014) made it popular with the red pivot letter our app copies.</p>
+    <ul class="dots mt-2">
+      <li><b>Blocking the jump back hurts comprehension.</b> In normal reading of single sentences, text already read was masked so rereading found nothing; comprehension fell (the reported drop, from about 75% to about 50% correct, is not checked). <a href="https://doi.org/10.1177/0956797614531148">Schotter, Tran &amp; Rayner 2014</a>. This was not RSVP, and whether ← (a jump to the sentence start) restores the benefit is my inference.</li>
+      <li><b>Spritz against normal reading at 250 wpm:</b> literal comprehension worse, inferential the same, more eye fatigue from fewer blinks. <a href="https://doi.org/10.1016/j.chb.2014.12.043">Benedetto et al. 2015</a> (speed as reported by Di Nocera et al. 2018; n not verified)</li>
+      <li><b>Where the losses start:</b> <a href="https://doi.org/10.1016/j.chb.2016.12.047">Ricciardi &amp; Di Nocera 2017</a> tested 250 and 450 wpm: no loss at 250, a loss at 450.
+      Di Nocera et al. 2018 (<a href="https://iris.uniroma1.it/retrieve/e3835320-f382-15e8-e053-a505fe0a3de9/Di-Nocera_Rapid_2018.pdf">PDF</a>), 209 people, 250–450 wpm against normal reading: with the stricter corrected test, no loss up to 350 and losses at 400 and 450; with simple pairwise tests, normal reading already won at 300 and 350. Scores fell steadily with speed.</li>
+      <li><b>Those speeds are settings, not real rates:</b> Spritz pauses longer on some words, so its 300 setting really ran at 230 wpm, 350 at 265 and 400 at 305 (Di Nocera 2018, Table 1). None of these studies let readers go back.</li>
+      <li>Normal static text beat RSVP at 700 and 1,000 wpm. <a href="https://doi.org/10.5406/amerjpsyc.130.2.0183">Acklin &amp; Papesh 2017</a> (n not verified)</li>
+      <li>RSVP with no pause between sentences did worse than skimming for the same time. Masson 1983, via Rayner et al. 2016</li>
+    </ul>
+  </div>
+</div>
+<div class="pc"><div class="pro"><b>Pros</b><br>About matches normal reading at normal speeds; no eye travel; works in a small window.</div><div class="con"><b>Cons</b><br>Not faster at equal comprehension. Small losses can start from a real rate of about 230 wpm, literal detail first. More eye fatigue.</div></div>
+<p class="fit"><b>In our app:</b> ← returns to the sentence start, a deliberate jump back. Like Spritz, the app holds some words longer: clause ends 1.5×, sentence ends 2×, paragraph ends 2.5×, words over 8 letters 1.3× (<code>Reading.swift</code>). On about 980 words of prose that makes the 400 setting a real 357 wpm, and 300 a real 268; see decision D1.</p>
+</div>
+
+<div class="method" id="m-phrase">
+<h3><span class="rank">4</span> Phrase and cascade layouts <span class="tag some">Helps some</span></h3>
+<div class="grid2">
+  <div>
+    <div class="demo" data-layout="cascade">
+      <div class="controls"><button type="button" data-toggle>Show plain text</button> cascade: indented by grammar</div>
+      <div class="para"></div>
+    </div>
+    <div class="demo mt-3" data-demo="chunks">
+      <div class="controls"><button type="button" data-play aria-pressed="false">Play</button> phrase RSVP <input type="range" min="200" max="700" step="50" value="300" data-wpm aria-label="Words per minute"> <output data-wpm-out>300 wpm</output></div>
+      <div class="stage center"></div>
+    </div>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> text is broken at phrase boundaries, and in a cascade indented by sentence structure, so the layout shows how the sentence is built.</p>
+    <ul class="dots mt-2">
+      <li><b>Large randomised trial, school-age:</b> 4,266 students in grades 7–8 reading in cascade format under an hour a week showed tiny but significant gains in overall English and writing scores (effect sizes 0.05 and 0.07); the reading-comprehension subtest showed no clear difference. Speed was not measured. <a href="https://doi.org/10.1080/10888438.2018.1561700">Tate et al. 2019</a>, sample from the <a href="https://ies.ed.gov/ncee/wwc/Study/88755">What Works Clearinghouse</a></li>
+      <li>Adult studies so far are by the format's developers: Live Ink (Walker et al. 2005) and Cascade Reading's 2025 preprints (<a href="https://cascadereading.com/research/">site</a>); treat them as vendor claims.</li>
+      <li><b>Phrase RSVP against single-word RSVP: no head-to-head study found.</b> One 1984 study of rapidly shown multi-word segments (Cocklin, Ward, Chen &amp; Juola) may be one; I could not read it.</li>
+    </ul>
+  </div>
+</div>
+<div class="pc"><div class="pro"><b>Pros</b><br>Gives back some preview and grouping that single-word RSVP removes. Cheap to add.</div><div class="con"><b>Cons</b><br>The trial evidence is on teenagers' overall English and writing scores, not comprehension or adult speed. Good phrase breaks need a parser; punctuation alone is rough.</div></div>
+<p class="fit"><b>In our app:</b> phrase RSVP is a natural mode, and an open question in the literature; see decision D2.</p>
+</div>
+
+<div class="method" id="m-type">
+<h3><span class="rank">5</span> Letter spacing and line length <span class="tag some">Helps some</span></h3>
+<div class="grid2">
+  <div class="demo" data-layout="spacing">
+    <div class="controls"><button type="button" data-toggle>Show plain text</button> extra letter spacing</div>
+    <div class="para"></div>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> wider spacing reduces crowding, where neighbouring letters interfere; line length changes how often the eye must jump to a new line.</p>
+    <ul class="dots mt-2">
+      <li>Dyslexic children aged 8–14 read faster and more accurately with extra-wide letter spacing; typical readers did not speed up. <a href="https://doi.org/10.1073/pnas.1205566109">Zorzi et al. 2012</a> (the figures quoted in the press, +20% speed and doubled accuracy, are not verified against the paper)</li>
+      <li>Long lines (100 characters) were read faster than short ones (25) with equal comprehension; about 55 characters was rated easiest. Dyson &amp; Kipping 1998, Dyson &amp; Haselgrove 2001 (figures from abstracts, not verified)</li>
+      <li>Dyslexia fonts: no gain from the letter shapes in controlled tests (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5629233">Wery &amp; Diliberto 2017</a>); earlier gains came from their wider spacing.</li>
+    </ul>
+  </div>
+</div>
+<div class="pc"><div class="pro"><b>Pros</b><br>Real help for dyslexic readers; costs nothing.</div><div class="con"><b>Cons</b><br>No speed gain for typical adult readers.</div></div>
+</div>
+
+<div class="method" id="m-skim">
+<h3><span class="rank">6</span> Skimming <span class="tag trade">Trades comprehension</span></h3>
+<div class="study">
+  <p><b>How it works:</b> deliberately reading only parts of the text, chosen by your goal.</p>
+  <ul class="dots mt-2">
+    <li>2–4× faster with lower comprehension; fine for finding a fact or getting the gist of a familiar topic. Rayner et al. 2016</li>
+    <li>Readers trained in speed reading and readers trained to skim both reached about 600–700 wpm against 250 for normal readers; neither could answer detail questions about text they had not fixated. Just, Masson &amp; Carpenter 1980, via Rayner et al. 2016</li>
+  </ul>
+</div>
+<div class="pc"><div class="pro"><b>Pros</b><br>The honest fast mode: you choose what to lose.</div><div class="con"><b>Cons</b><br>Details are gone; not reading.</div></div>
+</div>
+
+<div class="method" id="m-fast">
+<h3><span class="rank">7</span> Fast RSVP, speed-reading courses, suppressing inner speech <span class="tag trade">Trades or hurts</span></h3>
+<div class="study">
+  <ul class="dots">
+    <li>A speed-reading course raised speed from 280 to 400 wpm while comprehension fell from 81% to 74%. Calef et al. 1999, via Rayner et al. 2016</li>
+    <li>Training peripheral vision did not produce faster reading with good comprehension. Brim 1968; Sailor &amp; Ball 1975, via Rayner et al. 2016</li>
+    <li>Saying irrelevant words aloud while reading, to block inner speech, hurt comprehension; finger tapping did not. Inner speech is part of understanding, not a habit to train away. Rayner et al. 2016</li>
+  </ul>
+</div>
+<div class="pc"><div class="pro"><b>Pros</b><br>Faster on the clock.</div><div class="con"><b>Cons</b><br>Comprehension pays for it, every time it was measured.</div></div>
+</div>
+
+<div class="method" id="m-pace">
+<h3><span class="rank">8</span> Pacers, scrolling text, eye-tracking displays <span class="tag untested">Untested</span></h3>
+<div class="grid2">
+  <div>
+    <div class="demo" data-demo="pacer">
+      <div class="controls"><button type="button" data-play aria-pressed="false">Play</button> pacer <input type="range" min="200" max="700" step="50" value="300" data-wpm aria-label="Words per minute"> <output data-wpm-out>300 wpm</output></div>
+      <div class="para"></div>
+    </div>
+    <div class="demo mt-3" data-demo="leading">
+      <div class="controls"><button type="button" data-play aria-pressed="false">Play</button> scrolling text <input type="range" min="200" max="700" step="50" value="300" data-wpm aria-label="Words per minute"> <output data-wpm-out>300 wpm</output></div>
+      <div class="stage" style="--hide:1"><div class="strip"></div></div>
+    </div>
+  </div>
+  <div class="study">
+    <p><b>How they work:</b> a pacer is a finger, pointer or highlight the eye follows; scrolling text moves the line past a fixed window; eye-tracking displays react to where you look.</p>
+    <ul class="dots mt-2">
+      <li>Pacers: no controlled study found; the review mentions them only anecdotally.</li>
+      <li>Scrolling text: no recent controlled study found beyond older RSVP work.</li>
+      <li>Eye-tracking highlighting: 70 second graders read faster with fewer regressions and the same comprehension, but preferred plain text (<a href="https://doi.org/10.1080/00140139.2025.2514600">Ergonomics 2025</a>); a 13-person pilot found no difference. Needs an eye tracker.</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<div class="method" id="m-beeline">
+<h3><span class="rank">9</span> Colour gradients across lines (BeeLine Reader) <span class="tag untested">Untested in adults</span></h3>
+<div class="grid2">
+  <div class="demo" data-layout="beeline">
+    <div class="controls"><button type="button" data-toggle>Show plain text</button> colour runs across each line and turns back on the next</div>
+    <div class="para"></div>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> the end of each line matches the start of the next in colour, to guide the eye back to the next line.</p>
+    <ul class="dots mt-2">
+      <li>Dutch children: faster only for 2nd graders with long, tightly spaced lines; 3rd graders possibly understood less and found it harder to read. <a href="https://doaj.org/article/b48617b6416f4030ae9bf57ab79d1318">Koornneef &amp; Kraal 2022</a></li>
+      <li>The "10–30% faster" figures are the vendor's; no adult controlled study found.</li>
+      <li>The return to the next line is not where reading time goes. Rayner et al. 2016</li>
+    </ul>
+  </div>
+</div>
+<p class="fit"><b>In our app:</b> not applicable; RSVP has no lines.</p>
+</div>
+
+<div class="method" id="m-bionic">
+<h3><span class="rank">10</span> Bold word starts (Bionic Reading) <span class="tag none">No effect</span></h3>
+<div class="grid2">
+  <div class="demo" data-layout="bionic">
+    <div class="controls"><button type="button" data-toggle>Show plain text</button> first half of each word in bold</div>
+    <div class="para"></div>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> bolding the start of each word is claimed to guide the eye and let the brain fill in the rest.</p>
+    <ul class="dots mt-2">
+      <li>53 adults, eye-tracked, two passages each way: 131.1 against 130.8 wpm (p = 0.9); fixations unchanged. <a href="https://doi.org/10.3390/jemr18050049">Beelders 2025</a></li>
+      <li>100 paragraphs, Bionic against normal: no difference in reading time. <a href="https://doi.org/10.1016/j.actpsy.2024.104304">Snell 2024, "No, Bionic Reading does not work"</a></li>
+      <li>A self-selected online test, 1,916 readers analysed, with the order of fonts randomised: no speed gain. <a href="https://blog.readwise.io/bionic-reading-results/">Readwise 2022</a></li>
+    </ul>
+  </div>
+</div>
+</div>
+</section>
+
+<section>
+<div class="callout">
+<b>Reading to learn is a different question.</b>
+For a textbook, the studies point away from speed altogether: the gains come from recalling, explaining and manipulating what you read.
+That review has its own page: <a href="beyond-reading.html">Beyond reading</a>.
+</div>
+<p class="eyebrow mt-10">4 · Decisions</p>
+<h2>Two cheap changes follow from the evidence; both wait on you</h2>
+
+<div class="decision">
+<p class="eyebrow">D1 · Default speed</p>
+<h3>Lower the default from 400 to 300 wpm?</h3>
+<p class="prose mt-2">This only matters for silent reading, and only until you first press ↑ or ↓: the app then remembers your speed, and in V mode the voice sets the pace.
+Our 400 setting reads at a real 357 wpm (method 3), above every rate where the studies found no loss; 300 reads at a real 268, close to Spritz's 350 setting (real 265), where the strict test found no loss and the simple one a small one.
+↑ still goes faster whenever you want to skim.</p>
+<div class="opts">
+  <div class="opt rec"><span class="badge-rec">Recommended</span><b>300 wpm</b>Starts new readers near the edge of where losses begin, not past it; a one-line change.</div>
+  <div class="opt"><b>Keep 400 wpm</b>You have already set your own speed, so the default only affects a fresh install.</div>
+</div>
+</div>
+
+<div class="decision">
+<p class="eyebrow">D2 · Phrase mode</p>
+<h3>Add a key that switches between one word and short phrases?</h3>
+<p class="prose mt-2">Phrase display gives back some grouping that single words remove (method 4), and I found no study comparing phrase RSVP with single-word RSVP, so your own use is the test.
+A first version would break at punctuation and keep short words with the next one; a grammar-aware version is a later step.</p>
+<div class="opts">
+  <div class="opt rec"><span class="badge-rec">Recommended</span><b>Build it as a toggle</b>A small change with tests in ReaderCore, the part of the app that splits text into words and times them. Then a week of articles at the same speed, alternating modes, with three questions you write after each: keep phrases if you answer more, or prefer it at equal scores.</div>
+  <div class="opt"><b>Not now</b>The evidence for phrase layouts is weak: tiny gains in teenagers' writing scores, none clear in comprehension or speed.</div>
+</div>
+</div>
+</section>
+
+<section>
+<p class="eyebrow">5 · Plan</p>
+<h2>Once you pick, each change is small</h2>
+<ol class="dots prose mt-3" style="list-style:decimal">
+<li>D1: one number in <code>Reader.swift</code>, the file that runs the reading panel.</li>
+<li>D2: one new function in ReaderCore that groups words into phrases, tests for where phrases break, and a key (P, currently unused) to switch.</li>
+<li>Keep V mode as is: listening is the best-supported fast option, and V is it.</li>
+</ol>
+</section>
+
+<section>
+<details>
+<summary>Not verified, and gaps in the literature</summary>
+<ul class="dots">
+<li>Sample sizes not verified: Benedetto 2015, Acklin &amp; Papesh 2017, Snell 2024 (32 is second-hand).</li>
+<li>The specific figures from Rayner et al. 2016 (250 ms, 10%, 30% skipped, Spritz's 80%, 2× speech ≈ 300 wpm, Calef, Just et al., Masson) are from the review as summarised; its full text was unreachable. Its overall conclusion was checked against the abstract.</li>
+<li>Spritz as a company after 2014, and its speed claims, are not covered.</li>
+<li>Zorzi 2012 effect sizes and sample counts; Dyson's line-length figures; Kuster's dyslexia-font study details.</li>
+<li>Results of Öquist &amp; Goldstein 2003 (adaptive RSVP, n = 16) not retrieved.</li>
+<li>No controlled study found for: pacers; phrase against single-word RSVP; RSVP plus a synced voice; BeeLine with adults; AI summaries as a speed aid.</li>
+<li>AI-era tools with published user studies (Paper Plain, Scim) target understanding papers, not speed, so they are left out of the ranking.</li>
+</ul>
+</details>
+<details id="reader-review">
+<summary>Reader review · 15 items, 36 claims · Nov 7</summary>
+<p>Two fresh Opus agents, in parallel: a reviewer playing the reader, holding only his two reader files, the seen list below and the page; a fact judge holding the app's code, this Mac and the cited papers. Reviewer's verdict: "Not yet. I can agree that Bionic, BeeLine and speed-reading courses are out. I can&#x27;t decide D1 until I know whether it matters in V mode and whether the range applies to an RSVP reader with ←."</p>
+<table class="plain">
+<tr><th>#</th><th>Reviewer item</th><th>Answer</th></tr>
+<tr><td>1</td><td>D1 rests on studies that disagree and don't match the app; V mode not explained.</td><td>Fixed: D1 now says the default matters only for silent reading until you first press ↑ ↓ (Reader.swift:51-52 saves wpm), gives both 2017 and 2018 results with real rates, and method 1 says V mode ignores wpm (Reader.swift:112,134).</td></tr>
+<tr><td>2</td><td>The headline undercuts the app's premise and the page never says so.</td><td>Fixed: new paragraph "What this means for our app" in section 1: ~10% ceiling, skipped words shown, what RSVP is for instead.</td></tr>
+<tr><td>3</td><td>"Listening at up to 2×": gain over what?</td><td>Fixed: headline and method 1 give the working, 300 / 250 ≈ 1.2, and say no single study tested it.</td></tr>
+<tr><td>4</td><td>Unknown terms: g, meta-analysis, n, p, not significant.</td><td>Fixed: added to section 1's terms, with a scale for g.</td></tr>
+<tr><td>5</td><td>The ranking rule can't be reproduced.</td><td>Fixed: rule stated (speed gained at equal comprehension, evidence breaks ties); practice moved above RSVP; RSVP's tag is now "No loss, no gain".</td></tr>
+<tr><td>6</td><td>No mark of which methods apply to our app.</td><td>Fixed: new "Our app" column.</td></tr>
+<tr><td>7</td><td>The "falls to chance" result is from normal reading, applied to RSVP.</td><td>Fixed: the bullet says what was tested, marks the drop as unchecked and the step to RSVP and ← as inference.</td></tr>
+<tr><td>8</td><td>Claims about the app he wasn't told: pauses, ReaderCore, Reader.swift.</td><td>Fixed: the pause weights are given with their file (Reading.swift:21,37-41, checked by the judge); ReaderCore and Reader.swift are explained where used.</td></tr>
+<tr><td>9</td><td>D2's "your own use is the test" has no way to judge it.</td><td>Fixed: D2 now names the test: same speed, alternating modes, three questions per article.</td></tr>
+<tr><td>10</td><td>Is D1 really his decision?</td><td>Fixed: D1 states it only affects fresh installs and silent mode; it stays a card because the default is his call.</td></tr>
+<tr><td>11</td><td>Evidence dots overclaim on RSVP.</td><td>Fixed: RSVP lowered to ●●○; listening also lowered to ●●○.</td></tr>
+<tr><td>12</td><td>Row 7 links to the wrong card.</td><td>Fixed: row 7 links courses to method 7 and fast RSVP to method 3.</td></tr>
+<tr><td>13</td><td>Spritz barely covered; the 80% claim unsourced.</td><td>Fixed: Spritz introduced in section 1 and method 3; the 80% is attributed to Rayner's review and marked unchecked. Unknown: Spritz's later history, listed under Not verified.</td></tr>
+<tr><td>14</td><td>Preview, side view and look-ahead are one idea with three names.</td><td>Fixed: "preview" everywhere, hero included.</td></tr>
+<tr><td>15</td><td>"Under an hour" is asserted.</td><td>Fixed: estimate removed; the plan says what each change touches.</td></tr>
+</table>
+<table class="plain mt-3">
+<tr><th>#</th><th>Claim</th><th>Judge</th><th>Answer</th></tr>
+<tr><td>1</td><td>Self-paced reading beats listening on inference, g = 0.36.</td><td>Wrong: 0.36 is inference across pacing; self-paced is 0.13.</td><td>Fixed: both stated separately, on both pages.</td></tr>
+<tr><td>2</td><td>Cascade layouts give a small comprehension gain.</td><td>Wrong: gains in overall English (0.05) and writing (0.07); comprehension indeterminate.</td><td>Fixed: ranking, cons and D2 say so.</td></tr>
+<tr><td>3</td><td>Benedetto tested Spritz at ~200 wpm.</td><td>Wrong: 250 wpm per Di Nocera 2018.</td><td>Fixed: 250, with its source.</td></tr>
+<tr><td>4</td><td>Losses start above 250 wpm (Ricciardi 2017).</td><td>Wrong: tested only 250 and 450.</td><td>Fixed.</td></tr>
+<tr><td>5</td><td>No loss up to 350 wpm (2018), so 300 is safe.</td><td>Wrong in part: pairwise tests found losses at 300 and 350; rates are nominal.</td><td>Fixed: both tests and real rates shown; D1 uses real rates (app's 300 ≈ 268, judge's port of Reading.swift).</td></tr>
+<tr><td>6</td><td>Readwise test was uncontrolled.</td><td>Wrong: counterbalanced, 1,916 analysed.</td><td>Fixed.</td></tr>
+<tr><td>7</td><td>RSVP with going back allowed works, ●●●.</td><td>Unsupported: no study tested it.</td><td>Fixed: row renamed "RSVP at normal speed", ●●○, going back marked as inference.</td></tr>
+<tr><td>8</td><td>Listening at up to 2× is the best-backed gain.</td><td>Holds in direction; combines two studies.</td><td>Fixed: working and caveat shown.</td></tr>
+<tr><td>9</td><td>No study compares phrase and single-word RSVP.</td><td>Unsupported: Cocklin et al. 1984 may.</td><td>Unknown: the page names it as possibly relevant and unread.</td></tr>
+<tr><td>10–19</td><td>Murphy details, Schotter's 75%→50%, Rayner's figures, Klimovich +35, Zorzi, Wery, Beelders, the 13-person pilot, Cascade preprints, Dyson.</td><td>Unsupported: sources unreachable.</td><td>Unknown: marked unchecked where they stand or in Not verified; Schotter's figures now marked inline.</td></tr>
+<tr><td>20–36</td><td>Code facts (400 default, ↑, ←, pause weights, V mode, P free) and Brysbaert, Rayner's conclusion, Clinton-Lisell 2023 and 2022 overall, Murphy, Acklin, Tate, Koornneef, Rummens, Snell, Klimovich.</td><td>Holds.</td><td>Holds; no change.</td></tr>
+</table>
+<p>Rejected: none.</p>
+<details><summary>The seen list the reviewer held</summary><pre style="white-space:pre-wrap;font-size:12.5px"># Seen list: Reading for Nerds research pages (reading-methods.html, beyond-reading.html)
+
+## From the chat: his words, verbatim
+
+- &quot;i know that this idea is called RSVP and was tried before with the spritz app. i&#x27;m sure there&#x27;s several other approaches that were explored outside of RSVP for trying to improve the reading experience. what other solutions have people come up with? rank them on their pros and cons and include small demos / animations to help me understand the different methods. present to me in a lavish file&quot;
+- &quot;specifically i&#x27;m looking for methods that have been explored in the academic literature (i know that RSVP has studies). i&#x27;d like study backed outcomes where possible&quot;
+- &quot;I&#x27;m also sure people have specifically looked into ideas like personalizing content. So something like if I&#x27;m trying to read a textbook, how can I highlight a piece of text and optimize it for my understanding or to maximize my learning? What have people found on this? And again, I want a review of the academic literature. Looking for creativity here. So do people make animations? How are people moving beyond reading? I just think reading might be somewhat obsolete relative to much more impressive ways to very quickly understand and play with and interact with ideas.&quot;
+- Earlier, on audio: &quot;i would like this to be free and open source if possible just to keep the tool foundational and clean. not interested in introducing subscriptions at this point given how simple everything is&quot;
+- &quot;we&#x27;ll need it to be effectively real time&quot;
+- &quot;amazing this works very well. i installed the premium voice ava.&quot;
+
+## What he was told (marked as told)
+
+- Told: the app he uses: highlight text, press ⌃⌥R, words play one at a time with a red pivot letter at a fixed point; Space pauses, ↑↓ change speed by 25 wpm, ←→ jump a sentence, V toggles Apple&#x27;s voice; default speed 400 wpm.
+- Told: the voice uses Apple&#x27;s AVSpeechSynthesizer; words appear as the voice says them.
+- Told: the app has no third-party dependencies, by his choice.
+- He has used the app and the voice; he has not seen either page.
+
+## What he does NOT know
+
+- Eye-movement vocabulary: fixation, saccade, regression, parafoveal preview, optimal recognition point beyond &quot;the red letter&quot;.
+- Effect sizes (g, d), meta-analysis, delayed test, fluency illusion, expertise reversal, retrieval practice, spacing, self-explanation, productive failure, generation effect.
+- Any of the cited studies or authors (Rayner, Brysbaert, Schotter, Benedetto, Clinton-Lisell, Dunlosky, Roediger &amp; Karpicke, Bisra, VanLehn, Kestin, Bastani, Kreijkes, Schroeder, Chernikova, Mayer, Noetel, etc.).
+- Cascaded text, BeeLine Reader, Bionic Reading, Spritz&#x27;s history beyond its name.
+- Apple&#x27;s FoundationModels framework, and that it was spike-tested on his Mac (3.0 s, three questions, one muddled).
+- That the pages are numbered D1, D2 (reading-methods) and D3 (beyond-reading).
+</pre></details>
+</details>
+</section>
+
+</div>
+<script>
+// Small live demos of each reading method, all on one shared passage.
+// Each demo is a function (el) => {play, stop}; controls are wired by data attributes.
+const PASSAGE = "When we read, our eyes do not glide smoothly across the line. They jump from word to word in quick hops, pausing for about a quarter of a second on each stop. Most of the work happens during those pauses, and sometimes the eyes jump back to check a word they passed too quickly.";
+const WORDS = PASSAGE.split(/\s+/);
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Phrase chunks, split by hand at syntactic boundaries.
+const CHUNKS = [
+  "When we read,", "our eyes", "do not glide smoothly", "across the line.",
+  "They jump", "from word to word", "in quick hops,", "pausing", "for about a quarter of a second", "on each stop.",
+  "Most of the work", "happens during those pauses,", "and sometimes", "the eyes jump back", "to check a word", "they passed too quickly."
+];
+// Cascade: [indent level, phrase], indent follows the sentence's grammar.
+const CASCADE = [
+  [0, "When we read,"], [1, "our eyes do not glide smoothly"], [2, "across the line."],
+  [0, "They jump"], [1, "from word to word"], [1, "in quick hops,"], [2, "pausing for about a quarter of a second"], [3, "on each stop."],
+  [0, "Most of the work happens"], [1, "during those pauses,"], [0, "and sometimes the eyes jump back"], [1, "to check a word"], [2, "they passed too quickly."]
+];
+
+function pivotIndex(w) {
+  const core = w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+  const lead = w.length - w.replace(/^[^\p{L}\p{N}]+/u, "").length;
+  const n = core.length;
+  return lead + (n <= 1 ? 0 : n <= 5 ? 1 : n <= 9 ? 2 : n <= 13 ? 3 : 4);
+}
+function esc(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]); }
+
+// Runs step(i) for i = 0, 1, 2…; step returns a delay in ms, or false when done.
+function ticker(el, step, ms) {
+  let t = null, i = 0;
+  return {
+    play() { this.stop(); i = 0; const tick = () => { const next = step(i++); if (next === false) return el.dispatchEvent(new Event("demoend")); t = setTimeout(tick, typeof next === "number" ? next : ms()); }; tick(); },
+    stop() { clearTimeout(t); t = null; },
+  };
+}
+
+const DEMOS = {
+  // One word at a time, pivot letter fixed under the notch.
+  rsvp(el) {
+    const stage = el.querySelector(".stage");
+    const wpm = () => +el.querySelector("[data-wpm]")?.value || 350;
+    return ticker(el, i => {
+      if (i >= WORDS.length) return false;
+      const w = WORDS[i], p = pivotIndex(w);
+      stage.innerHTML = `<span class="rsvp-word"><span class="pre">${esc(w.slice(0, p))}</span><b>${esc(w[p] || "")}</b><span>${esc(w.slice(p + 1))}</span></span>`;
+      // Centre the red letter on the notch.
+      const word = stage.firstChild;
+      word.style.marginLeft = `${-word.querySelector("b").offsetWidth / 2}px`;
+      const m = /[.!?]$/.test(w) ? 2 : /[,;:]$/.test(w) ? 1.5 : 1;
+      return 60000 / wpm() * m;
+    }, () => 0);
+  },
+  // Same pacing idea, but a phrase at a time.
+  chunks(el) {
+    const stage = el.querySelector(".stage");
+    const wpm = () => +el.querySelector("[data-wpm]")?.value || 350;
+    return ticker(el, i => {
+      if (i >= CHUNKS.length) return false;
+      stage.innerHTML = `<span class="chunk">${esc(CHUNKS[i])}</span>`;
+      return 60000 / wpm() * CHUNKS[i].split(" ").length + 120;
+    }, () => 0);
+  },
+  // Text scrolls right to left through a fixed window, like a news ticker.
+  leading(el) {
+    const strip = el.querySelector(".strip");
+    strip.textContent = PASSAGE;
+    let raf = null;
+    return {
+      play() {
+        this.stop();
+        const wpm = +el.querySelector("[data-wpm]")?.value || 350;
+        const pxPerWord = strip.scrollWidth / WORDS.length;
+        const start = performance.now();
+        const frame = now => {
+          const x = el.clientWidth - (now - start) / 60000 * wpm * pxPerWord;
+          strip.style.transform = `translateX(${x}px)`;
+          if (x > -strip.scrollWidth) raf = requestAnimationFrame(frame); else el.dispatchEvent(new Event("demoend"));
+        };
+        raf = requestAnimationFrame(frame);
+      },
+      stop() { cancelAnimationFrame(raf); },
+    };
+  },
+  // A highlight sweeps along each line at a set pace, the eye follows it.
+  pacer(el) {
+    const box = el.querySelector(".para");
+    box.innerHTML = WORDS.map(w => `<span>${esc(w)}</span>`).join(" ");
+    const spans = [...box.children];
+    const wpm = () => +el.querySelector("[data-wpm]")?.value || 350;
+    return ticker(el, i => {
+      spans.forEach((s, j) => s.classList.toggle("lit", j === i));
+      if (i >= spans.length) return false;
+    }, () => 60000 / wpm());
+  },
+  // Each word is highlighted as the browser's voice says it.
+  listen(el) {
+    const box = el.querySelector(".para");
+    box.innerHTML = WORDS.map(w => `<span>${esc(w)}</span>`).join(" ");
+    const spans = [...box.children];
+    const starts = []; let o = 0; for (const w of WORDS) { starts.push(o); o += w.length + 1; }
+    return {
+      play() {
+        this.stop();
+        if (!("speechSynthesis" in window)) { box.insertAdjacentHTML("beforebegin", "<p class='note'>This browser has no speech voice.</p>"); return; }
+        const u = new SpeechSynthesisUtterance(PASSAGE);
+        u.rate = +el.querySelector("[data-rate]")?.value || 1;
+        u.onboundary = e => {
+          if (e.name && e.name !== "word") return;
+          let k = 0; while (k + 1 < starts.length && starts[k + 1] <= e.charIndex) k++;
+          spans.forEach((s, j) => s.classList.toggle("lit", j === k));
+        };
+        u.onend = () => { spans.forEach(s => s.classList.remove("lit")); el.dispatchEvent(new Event("demoend")); };
+        speechSynthesis.speak(u);
+      },
+      stop() { if ("speechSynthesis" in window) speechSynthesis.cancel(); spans.forEach(s => s.classList.remove("lit")); },
+    };
+  },
+};
+
+// Static layouts, switched with a toggle between plain and treated text.
+const LAYOUTS = {
+  cascade: () => CASCADE.map(([d, t]) => `<div style="padding-left:${d * 1.4}em">${esc(t)}</div>`).join(""),
+  bionic: () => WORDS.map(w => { const n = Math.ceil(w.replace(/[^\p{L}]/gu, "").length / 2); return `<b>${esc(w.slice(0, n))}</b>${esc(w.slice(n))}`; }).join(" "),
+  spacing: () => `<span style="letter-spacing:.12em;word-spacing:.3em">${esc(PASSAGE)}</span>`,
+  beeline: (el) => {
+    // Colour each word along a gradient that alternates direction per line, so a line's end matches the next line's start.
+    const box = el.querySelector(".para");
+    box.innerHTML = WORDS.map(w => `<span>${esc(w)}</span>`).join(" ");
+    const spans = [...box.children];
+    const lines = []; let top = null;
+    for (const s of spans) { if (s.offsetTop !== top) { lines.push([]); top = s.offsetTop; } lines.at(-1).push(s); }
+    // Ends of the gradient come from the skin: primary blue to the pivot red.
+    const rgb = name => { const h = getComputedStyle(document.documentElement).getPropertyValue(name).trim().slice(1); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); };
+    const A = rgb("--color-primary"), B = rgb("--color-accent");
+    lines.forEach((line, li) => line.forEach((s, k) => {
+      let t = line.length > 1 ? k / (line.length - 1) : 0; if (li % 2) t = 1 - t;
+      s.style.color = `rgb(${A.map((a, c) => Math.round(a + (B[c] - a) * t)).join(",")})`;
+    }));
+    return null;
+  },
+};
+
+for (const el of document.querySelectorAll("[data-demo]")) {
+  const demo = DEMOS[el.dataset.demo](el);
+  const btn = el.querySelector("[data-play]");
+  let playing = false;
+  const set = p => { playing = p; btn.textContent = p ? "Stop" : "Play"; btn.setAttribute("aria-pressed", p); };
+  btn.addEventListener("click", () => { if (playing) { demo.stop(); set(false); } else { demo.play(); set(true); } });
+  el.addEventListener("demoend", () => set(false));
+}
+for (const el of document.querySelectorAll("[data-layout]")) {
+  const box = el.querySelector(".para");
+  const toggle = el.querySelector("[data-toggle]");
+  const plain = () => { box.innerHTML = esc(PASSAGE); };
+  const treated = () => { const html = LAYOUTS[el.dataset.layout](el); if (html !== null) box.innerHTML = html; };
+  let on = true;
+  const render = () => { on ? treated() : plain(); toggle.textContent = on ? "Show plain text" : "Show treated text"; };
+  toggle.addEventListener("click", () => { on = !on; render(); });
+  render();
+  if (el.dataset.layout === "beeline") addEventListener("resize", () => on && treated());
+}
+
+// Hero: draw the eye path over one line, measuring word positions in the browser.
+(function () {
+  const svg = document.getElementById("hero-svg");
+  const NS = "http://www.w3.org/2000/svg";
+  // Phones get the first half of the sentence, drawn at a readable size.
+  const narrow = svg.getBoundingClientRect().width < 600;
+  const W = narrow ? 420 : 760;
+  svg.setAttribute("viewBox", `0 0 ${W} ${narrow ? 300 : 270}`);
+  const words = narrow ? ["They", "jump", "from", "word", "to", "word."] : ["They", "jump", "from", "word", "to", "word", "in", "quick", "hops,", "pausing", "on", "each", "stop."];
+  const path = narrow ? [0, 1, 3, 5, -3, 5] : [0, 1, 3, 5, 7, 8, -5, 9, 11, 12]; // negative: a jump back
+  const fixed = new Set(path.map(Math.abs));
+  const mk = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); const paint = []; for (const k in attrs) { const v = String(attrs[k]); if ((k === "fill" || k === "stroke") && v.startsWith("var(")) paint.push([k, v]); else e.setAttribute(k, v); } for (const [k, v] of paint) e.style[k] = v; if (text) e.textContent = text; svg.appendChild(e); return e; };
+  const line = mk("text", { x: 20, y: 110, "font-size": 18, fill: "var(--color-base-content)" });
+  words.forEach((w, i) => { const t = document.createElementNS(NS, "tspan"); t.textContent = (i ? " " : "") + w; t.style.fill = fixed.has(i) ? "var(--color-base-content)" : "var(--faint)"; line.appendChild(t); });
+  const full = words.join(" ");
+  const starts = []; let o = 0; for (const w of words) { starts.push(o); o += w.length + 1; }
+  const xOf = i => 20 + line.getSubStringLength(0, starts[i]) + line.getSubStringLength(starts[i], Math.max(1, Math.floor(words[i].length / 3)));
+  let prev = null;
+  path.forEach((p, k) => {
+    const i = Math.abs(p), x = xOf(i), back = p < 0;
+    if (prev !== null) {
+      const d = back ? `M${prev},120 Q${(prev + x) / 2},170 ${x},120` : `M${prev},84 Q${(prev + x) / 2},50 ${x},84`;
+      mk("path", { d, pathLength: 1, fill: "none", stroke: back ? "var(--warn)" : "var(--quiet)", "stroke-width": back ? 2 : 1.5, class: "arc", style: `--i:${k}` });
+    }
+    mk("circle", { cx: x, cy: 88, r: 6, fill: back ? "var(--warn)" : "var(--brand)", class: "fx", style: `--i:${k}` });
+    prev = x;
+  });
+  const legend = narrow ? ["● a stop on a word (~250 ms)", "⌒ a jump ahead · grey: skipped"] : ["● a stop on a word (~250 ms)  ·  ⌒ a jump ahead  ·  grey words: skipped, taken in by preview"];
+  legend.forEach((t, k) => mk("text", { x: 20, y: 26 + k * 18, "font-size": 13, fill: "var(--mute)" }, t));
+  mk("text", { x: 20, y: 182, "font-size": 13, fill: "var(--warn)" }, "amber: a jump back to recheck; 10–15% of jumps");
+  const barEnd = W - 20, slice = (barEnd - 20) / 10;
+  mk("rect", { x: 20, y: 206, width: barEnd - 20 - slice - 2, height: 24, rx: 4, fill: "var(--brand)", class: "bar-fix" });
+  mk("rect", { x: barEnd - slice, y: 206, width: slice, height: 24, rx: 4, fill: "var(--quiet)", class: "bar-mov" });
+  mk("text", { x: 30, y: 223, "font-size": 12.5, fill: "var(--color-primary-content)" }, narrow ? "≈90%: stopped on words" : "≈90% of reading time: stopped on words");
+  mk("text", { x: barEnd - slice / 2, y: 223, "font-size": 12, fill: "var(--color-primary-content)", "text-anchor": "middle", class: "bar-mov" }, "10%");
+  const cutLines = narrow ? ["RSVP removes the grey slice, and with it", "the jump back and the preview"] : ["RSVP removes the grey slice, and with it the jump back and the preview"];
+  cutLines.forEach((t, k) => mk("text", { x: barEnd, y: 254 + k * 18, "font-size": 12.5, fill: "var(--warn)", "text-anchor": "end", class: "cut" }, t));
+  const hero = document.getElementById("hero");
+  hero.querySelector(".replay").addEventListener("click", () => { hero.classList.remove("play"); void hero.offsetWidth; hero.classList.add("play"); });
+})();
+// Range sliders show their value.
+for (const r of document.querySelectorAll("[data-wpm],[data-rate]")) {
+  const out = r.parentElement.querySelector("output");
+  const show = () => out.textContent = r.dataset.rate !== undefined ? r.value + "×" : r.value + " wpm";
+  r.addEventListener("input", show); show();
+}
+</script>
+</body>
+</html>

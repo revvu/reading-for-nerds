@@ -1,0 +1,67 @@
+/* Lavish skin — DaisyUI 5 custom theme.
+   theme-name: reading
+   Identity, taken from the app itself: black words on a page, one red pivot letter.
+   - Canvas: warm paper. Ink: near-black. Primary: fountain-pen blue, for links, data and actions.
+   - Accent: the pivot red. Use it only where the page shows the reader's pivot letter or a word being read, never for errors or decoration.
+   - Error is a plum, so it never reads as the pivot.
+   Type: headings in Literata (an open-licence serif designed for long reading on screens); body in the system font, as the app's panel uses.
+   Usage: set <html lang="en" data-theme="reading"> and inline this entire file at the very top of the artifact's <style> block (inline, never <link>; the @import must stay first). */
+@import url("https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,600;7..72,700&display=swap");
+
+[data-theme="reading"] {
+  color-scheme: light;
+  background-color: #fbf9f4;
+  --color-base-100: #fbf9f4;        /* paper */
+  --color-base-200: #f3efe6;        /* paper, shaded */
+  --color-base-300: #e2dccf;        /* rules */
+  --color-base-content: #1c1b18;    /* ink */
+  --color-primary: #24477a;         /* fountain-pen blue */
+  --color-primary-content: #fbf9f4;
+  --color-secondary: #1c1b18;
+  --color-secondary-content: #fbf9f4;
+  --color-accent: #d3362b;          /* the pivot letter */
+  --color-accent-content: #fbf9f4;
+  --color-neutral: #2a2925;
+  --color-neutral-content: #fbf9f4;
+  --color-info: #3a6b8c;
+  --color-info-content: #fbf9f4;
+  --color-success: #2e7550;
+  --color-success-content: #fbf9f4;
+  --color-warning: #a46f1f;
+  --color-warning-content: #1c1b18;
+  --color-error: #8e2f4a;           /* plum, kept apart from the pivot red */
+  --color-error-content: #fbf9f4;
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+  /* Extra tokens for pages. */
+  --reading-surface: #ffffff;                                                    /* cards on the paper */
+  --reading-mute: color-mix(in oklab, #1c1b18 60%, transparent);                /* secondary text */
+  --reading-tint: color-mix(in oklab, #24477a 7%, #ffffff);                     /* a primary wash */
+  --reading-mark: color-mix(in oklab, #24477a 18%, #ffffff);                    /* a word being read, or the answer */
+  --reading-serif: "Literata", Georgia, "Times New Roman", serif;
+  --reading-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+[data-theme="reading"] body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  background-color: #fbf9f4;
+  color: #1c1b18;
+}
+[data-theme="reading"] h1, [data-theme="reading"] h2 {
+  font-family: var(--reading-serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+[data-theme="reading"] h3, [data-theme="reading"] h4 { font-weight: 600; }
+[data-theme="reading"] .card {
+  background: var(--reading-surface);
+  border: 1px solid #e2dccf;
+  box-shadow: 0 1px 2px rgba(28, 27, 24, 0.04);
+}
+[data-theme="reading"] ::selection { background: color-mix(in oklab, #24477a 22%, #ffffff); }

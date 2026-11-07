@@ -3,22 +3,58 @@
 Highlight text anywhere on the Mac, press a hotkey, and read it word by word at one fixed point on screen.
 Each word is drawn with its recognition letter, in red, on the same spot, so your eyes never move.
 
+## Install
+
+You need macOS 14 or later and Apple's Command Line Tools.
+If `swift --version` prints a version, you have them; otherwise run `xcode-select --install`.
+
+1. Clone and install:
+
+   ```sh
+   git clone https://github.com/revvu/reading-for-nerds.git
+   cd reading-for-nerds
+   make install
+   ```
+
+   This builds the app, copies it to `~/Applications` and launches it.
+   A glasses icon appears in the menu bar.
+
+2. Highlight some text and press the hotkey: hold **Control** and **Option**, then tap **R** (written ⌃⌥R).
+
+3. The first time, macOS asks for Accessibility access, which the app needs to copy your selection.
+   Turn on **ReadingForNerds** in System Settings → Privacy & Security → Accessibility, then press the hotkey again.
+
+To update, run `git pull && make install`.
+To uninstall, quit from the menu bar and delete `~/Applications/ReadingForNerds.app`.
+
+### If something goes wrong
+
+- **`make install` fails with "Invalid manifest"**: some Command Line Tools installs keep stale files from an older version. Remove them, then run `make install` again:
+
+  ```sh
+  sudo rm /Library/Developer/CommandLineTools/usr/lib/swift/pm/ManifestAPI/PackageDescription.swiftmodule/*.private.swiftinterface
+  ```
+
+- **The hotkey stops working after a rebuild**: without an Apple Development certificate the app is signed ad hoc, and macOS forgets the Accessibility grant on every build. Remove ReadingForNerds from the Accessibility list, add it again, and relaunch.
+- **"Nothing selected"**: the front app didn't copy anything. Make sure the text is highlighted and that the app allows copying.
+
 ## Use
 
-- **⌃⌥R** reads the selection; press it again to close. Change it from the menu-bar glasses: Change Shortcut….
-- **Space** pauses, **↑ / ↓** change speed by 25 wpm, **← / →** jump a sentence, **Esc** closes.
-- The first run asks for Accessibility access, which it needs to press ⌘C for you.
+| Key | Action |
+|---|---|
+| ⌃⌥R | Read the selection; press again to close |
+| Space | Pause or resume |
+| ↑ / ↓ | Speed up or slow down by 25 wpm |
+| ← / → | Jump back or forward a sentence |
+| Esc | Close |
 
-## Build
+To change the hotkey, click the glasses icon in the menu bar, choose **Change Shortcut…**, and press the new combination.
 
-```sh
-make install   # builds, signs, copies to ~/Applications and launches
-make test
-```
+## How it works
 
 No dependencies: three files, one per layer.
 
 - `Hotkey.swift`: Carbon's `RegisterEventHotKey`, the one macOS API that claims a single key combination system-wide without a permission.
 - `Selection.swift`: posts ⌘C to the front app and restores your clipboard; copy works in nearly every app, where the Accessibility API's selected text does not.
 - `Reader.swift` and `ReaderView.swift`: a floating panel that takes keys without stealing focus, and draws each word around its pivot.
-- `ReaderCore`: the tested rules for where the pivot falls and how long each word stays up.
+- `ReaderCore`: the tested rules for where the pivot falls and how long each word stays up. Run them with `make test`.

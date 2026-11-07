@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en" data-theme="reading"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beyond Reading</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+<style>
+/* Lavish skin — DaisyUI 5 custom theme.
+   theme-name: reading
+   Identity, taken from the app itself: black words on a page, one red pivot letter.
+   - Canvas: warm paper. Ink: near-black. Primary: fountain-pen blue, for links, data and actions.
+   - Accent: the pivot red. Use it only where the page shows the reader's pivot letter or a word being read, never for errors or decoration.
+   - Error is a plum, so it never reads as the pivot.
+   Type: headings in Literata (an open-licence serif designed for long reading on screens); body in the system font, as the app's panel uses.
+   Usage: set <html lang="en" data-theme="reading"> and inline this entire file at the very top of the artifact's <style> block (inline, never <link>; the @import must stay first). */
+@import url("https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,600;7..72,700&display=swap");
+
+[data-theme="reading"] {
+  color-scheme: light;
+  background-color: #fbf9f4;
+  --color-base-100: #fbf9f4;        /* paper */
+  --color-base-200: #f3efe6;        /* paper, shaded */
+  --color-base-300: #e2dccf;        /* rules */
+  --color-base-content: #1c1b18;    /* ink */
+  --color-primary: #24477a;         /* fountain-pen blue */
+  --color-primary-content: #fbf9f4;
+  --color-secondary: #1c1b18;
+  --color-secondary-content: #fbf9f4;
+  --color-accent: #d3362b;          /* the pivot letter */
+  --color-accent-content: #fbf9f4;
+  --color-neutral: #2a2925;
+  --color-neutral-content: #fbf9f4;
+  --color-info: #3a6b8c;
+  --color-info-content: #fbf9f4;
+  --color-success: #2e7550;
+  --color-success-content: #fbf9f4;
+  --color-warning: #a46f1f;
+  --color-warning-content: #1c1b18;
+  --color-error: #8e2f4a;           /* plum, kept apart from the pivot red */
+  --color-error-content: #fbf9f4;
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+  /* Extra tokens for pages. */
+  --reading-surface: #ffffff;                                                    /* cards on the paper */
+  --reading-mute: color-mix(in oklab, #1c1b18 60%, transparent);                /* secondary text */
+  --reading-tint: color-mix(in oklab, #24477a 7%, #ffffff);                     /* a primary wash */
+  --reading-mark: color-mix(in oklab, #24477a 18%, #ffffff);                    /* a word being read, or the answer */
+  --reading-serif: "Literata", Georgia, "Times New Roman", serif;
+  --reading-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+[data-theme="reading"] body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  background-color: #fbf9f4;
+  color: #1c1b18;
+}
+[data-theme="reading"] h1, [data-theme="reading"] h2 {
+  font-family: var(--reading-serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+[data-theme="reading"] h3, [data-theme="reading"] h4 { font-weight: 600; }
+[data-theme="reading"] .card {
+  background: var(--reading-surface);
+  border: 1px solid #e2dccf;
+  box-shadow: 0 1px 2px rgba(28, 27, 24, 0.04);
+}
+[data-theme="reading"] ::selection { background: color-mix(in oklab, #24477a 22%, #ffffff); }
+
+/* page */
+/* Every colour comes from the skin's tokens. */
+:root { --mute: var(--reading-mute); --rule: var(--color-base-300); --brand: var(--color-primary); --ok: var(--color-success); --warn: var(--color-warning); --bad: var(--color-error); --pivot: var(--color-accent); --surface: var(--reading-surface); --tint: var(--reading-tint); --mark: var(--reading-mark);
+  --quiet: color-mix(in oklab, var(--color-base-content) 45%, var(--surface)); --faint: color-mix(in oklab, var(--color-base-content) 30%, var(--surface)); }
+.wrap { max-width: 980px; margin: 0 auto; padding: 32px 16px 96px; }
+section { margin-top: 64px; }
+h1 { font-size: 34px; line-height: 1.18; letter-spacing: -.005em; }
+h2 { font-size: 22px; line-height: 1.3; }
+h3 { font-size: 15.5px; }
+p, li { line-height: 1.55; }
+a { color: var(--brand); }
+.muted { color: var(--mute); }
+.eyebrow { font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+.problem { font-size:16.5px; line-height:1.55; max-width:68ch; }
+.problem b:first-child { color: var(--brand); }
+.box { border:1px solid var(--rule); border-radius:10px; background:var(--surface); padding:16px; min-width:0; }
+.lead { margin-top:6px; color: var(--mute); font-size:14.5px; max-width:72ch; }
+.prose { max-width: 70ch; }
+.prose p + p { margin-top: 10px; }
+.callout { border-left:3px solid var(--brand); background:var(--tint); padding:12px 16px; border-radius:0 8px 8px 0; }
+details { border-top:1px solid var(--rule); padding:12px 0; }
+details > summary { cursor:pointer; font-weight:600; }
+details[open] > summary { margin-bottom:8px; }
+details p, details li { font-size:14px; }
+.caption { font-size:13.5px; color: var(--mute); margin-top:8px; }
+ul.dots { list-style: disc; padding-left: 20px; }
+ul.dots li + li { margin-top: 4px; }
+
+/* hero: eye path over a line of text */
+.hero { position:relative; }
+.hero svg text { font-family: var(--reading-mono); }
+.replay { position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:99px; border:1px solid var(--rule); background:var(--surface); color:var(--mute); cursor:pointer; }
+.replay:hover { color: var(--brand); border-color: var(--brand); }
+.hero .fx, .hero .arc { opacity: 0; }
+.hero.play .fx { animation: pop .25s calc(var(--i) * .45s + .3s) both; }
+.hero.play .arc { animation: draw .3s calc(var(--i) * .45s + .15s) both; }
+.hero .arc { stroke-dasharray: 1; }
+.hero.play .bar-fix { animation: grow 1.2s 5.4s both; }
+.hero.play .bar-mov { animation: fadein .4s 6.6s both; }
+.hero.play .cut { animation: fadein .5s 7.2s both; }
+.hero .bar-fix { transform-box: fill-box; transform-origin: left; }
+@keyframes pop { from { opacity:0; transform: scale(.4); } to { opacity:1; } }
+@keyframes draw { from { opacity:1; stroke-dashoffset: 1; } to { opacity:1; stroke-dashoffset: 0; } }
+@keyframes grow { from { transform: scaleX(0); } }
+@keyframes fadein { from { opacity:0; } }
+@media (prefers-reduced-motion: reduce) { .hero .fx, .hero .arc { opacity: 1; } .hero.play * { animation: none !important; } .replay { display:none; } }
+
+/* ladder */
+.ladder { width:100%; border-collapse: collapse; font-size: 14px; }
+.ladder th { text-align:left; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); font-weight:600; padding:6px 8px; border-bottom:1px solid var(--rule); }
+.ladder td { padding:9px 8px; border-bottom:1px solid var(--rule); vertical-align: top; }
+.ladder td.n { color: var(--brand); font-weight:700; width: 28px; }
+.ladder a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--mute); }
+.ev { letter-spacing: 2px; color: var(--brand); white-space: nowrap; }
+.ev i { color: var(--rule); font-style: normal; }
+.tag { display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:999px; white-space:nowrap; }
+.tag.works { background: color-mix(in oklab, var(--color-success) 12%, var(--surface)); color: var(--color-success); }
+.tag.some { background: color-mix(in oklab, var(--color-info) 12%, var(--surface)); color: var(--color-info); }
+.tag.trade { background: color-mix(in oklab, var(--color-warning) 14%, var(--surface)); color: color-mix(in oklab, var(--color-warning) 80%, black); }
+.tag.none { background: color-mix(in oklab, var(--color-error) 12%, var(--surface)); color: var(--color-error); }
+.tag.untested { background: var(--color-base-200); color: var(--mute); }
+.up { color: var(--ok); font-weight: 600; } .down { color: var(--bad); font-weight: 600; } .flat { color: var(--mute); }
+@media (max-width: 640px) { .ladder .hide-sm { display:none; } h1 { font-size: 26px; } }
+
+/* method cards */
+.method { border:1px solid var(--rule); border-radius:12px; background:var(--surface); padding:18px; margin-top:18px; }
+.method h3 { font-size: 17px; display:flex; gap:10px; align-items: baseline; flex-wrap: wrap; }
+.method h3 .rank { color: var(--brand); }
+.grid2 { display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; margin-top: 12px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+.pc { display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; margin-top: 12px; font-size: 14px; }
+.pc > div { border-radius: 8px; padding: 10px 12px; }
+.pc .pro { background: color-mix(in oklab, var(--color-success) 8%, var(--surface)); } .pc .con { background: color-mix(in oklab, var(--color-error) 7%, var(--surface)); }
+.pc b { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
+@media (max-width: 560px) { .pc { grid-template-columns: 1fr; } }
+.study { font-size: 13.5px; }
+.study li + li { margin-top: 6px; }
+.fit { margin-top: 12px; font-size: 14px; }
+
+/* demos */
+.demo { border:1px solid var(--rule); border-radius:10px; background:var(--color-base-200); padding:12px; align-self: start; }
+.demo .controls { display:flex; gap:10px; align-items:center; flex-wrap: wrap; font-size: 13px; color: var(--mute); margin-bottom: 10px; }
+.demo button { font-size: 13px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--brand); color: var(--brand); background: var(--surface); cursor: pointer; }
+.demo button[aria-pressed="true"] { background: var(--brand); color: var(--color-primary-content); }
+.demo input[type=range] { width: 110px; accent-color: var(--brand); }
+.stage { position: relative; height: 92px; background: var(--surface); border-radius: 8px; border: 1px solid var(--rule); overflow: hidden; }
+.stage::before, .stage::after { content:""; position:absolute; left: 38%; width: 2px; height: 10px; background: var(--rule); }
+.stage::before { top: 10px; } .stage::after { bottom: 10px; }
+.stage.center::before, .stage.center::after { left: 50%; }
+.rsvp-word { position:absolute; top: 50%; left: 38%; transform: translateY(-50%); font-size: 30px; font-weight: 500; white-space: nowrap; }
+.rsvp-word .pre { position:absolute; right: 100%; }
+.rsvp-word b { color: var(--pivot); font-weight: 500; }
+.chunk { position:absolute; inset: 0; display:flex; align-items:center; justify-content:center; font-size: 26px; font-weight: 500; text-align:center; padding: 0 12px; }
+.strip { position:absolute; top: 50%; transform: translateX(100%); margin-top: -18px; font-size: 28px; white-space: nowrap; }
+.para { background:var(--surface); border:1px solid var(--rule); border-radius:8px; padding: 12px 14px; font-size: 16px; line-height: 1.6; max-width: 62ch; }
+.para span.lit { background: var(--mark); border-radius: 3px; box-shadow: 0 0 0 2px var(--mark); }
+.note { font-size: 13px; color: var(--bad); }
+
+/* decision cards */
+.decision { border:1px solid color-mix(in oklab, var(--brand) 35%, transparent); border-radius:12px; background:var(--surface); padding:18px; margin-top:16px; }
+.decision .opts { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:10px; margin-top: 12px; }
+.decision .opt { border:1px solid var(--rule); border-radius:8px; padding:10px 12px; font-size:14px; }
+.decision .opt.rec { border-color: var(--brand); background:var(--tint); }
+.decision .opt b { display:block; }
+.badge-rec { font-size: 11px; font-weight: 700; color: var(--brand); letter-spacing: .05em; text-transform: uppercase; }
+
+/* time bar */
+.timebar { display:flex; height: 34px; border-radius: 8px; overflow:hidden; font-size: 13px; color: var(--color-primary-content); }
+.timebar div { display:flex; align-items:center; padding: 0 10px; white-space: nowrap; }
+table.plain { width:100%; border-collapse: collapse; font-size: 13.5px; }
+table.plain td, table.plain th { border-bottom: 1px solid var(--rule); padding: 7px 8px; text-align: left; vertical-align: top; }
+table.plain th { font-size: 11.5px; letter-spacing:.06em; text-transform: uppercase; color: var(--mute); }
+
+/* effect-size chart */
+.es { display:grid; grid-template-columns: minmax(150px, 230px) minmax(0,1fr) 44px; gap: 6px 10px; align-items:center; font-size: 13.5px; }
+.es .lbl { text-align: right; line-height: 1.25; }
+.es .lbl small { display:block; color: var(--mute); font-size: 11.5px; }
+.es .track { position: relative; height: 18px; background: var(--color-base-200); border-radius: 4px; }
+.es .bar { position:absolute; left:0; top:0; bottom:0; border-radius: 4px; width: calc(var(--v) / 1 * 100%); transform-origin: left; }
+.es .bar.act { background: var(--brand); } .es .bar.pas { background: var(--faint); }
+.es .bar.unv.act { background: repeating-linear-gradient(135deg, var(--brand) 0 5px, color-mix(in oklab, var(--brand) 55%, var(--surface)) 5px 9px); }
+.es .bar.unv.pas { background: repeating-linear-gradient(135deg, var(--faint) 0 5px, color-mix(in oklab, var(--faint) 50%, var(--surface)) 5px 9px); }
+.es .val { font-variant-numeric: tabular-nums; color: var(--mute); }
+.es .gl { position:absolute; top:-4px; bottom:-4px; width:1px; background: color-mix(in oklab, var(--color-base-content) 18%, transparent); }
+.es.play .bar { animation: grow 1s calc(var(--i) * .12s + .2s) both; }
+@keyframes grow { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .es.play .bar { animation: none; } }
+@media (max-width: 560px) { .es { grid-template-columns: 112px minmax(0,1fr) 36px; font-size: 12.5px; } .es .lbl small { display:none; } }
+.legend { display:flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--mute); }
+.legend i { display:inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+/* demos */
+.demo textarea { width: 100%; min-height: 64px; border:1px solid var(--rule); border-radius: 8px; padding: 8px 10px; font-size: 14px; background:var(--surface); }
+.demo .q { font-size: 14.5px; font-weight: 600; margin-top: 8px; }
+.demo .reveal { display:none; margin-top: 10px; }
+.demo.shown .reveal { display:block; }
+.blur { filter: blur(6px); user-select: none; transition: filter .3s; }
+.para mark { background: var(--mark); border-radius: 3px; padding: 0 2px; }
+.opts-row { display:flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.opts-row button.pick[aria-pressed="true"] { background: var(--brand); color: var(--color-primary-content); }
+.model-out { font-size: 30px; font-weight: 600; color: var(--brand); font-variant-numeric: tabular-nums; }
+.stack { display:flex; height: 22px; border-radius: 5px; overflow: hidden; font-size: 11.5px; color: var(--color-primary-content); margin-top: 6px; }
+.stack div { display:flex; align-items:center; justify-content:center; white-space: nowrap; overflow:hidden; transition: flex-grow .3s; }
+.sl { display:grid; grid-template-columns: 150px minmax(0,1fr) 64px; gap: 6px 10px; align-items:center; font-size: 13px; margin-top: 6px; }
+.sl input { width: 100%; accent-color: var(--brand); }
+@media (max-width: 480px) { .sl { grid-template-columns: 110px minmax(0,1fr) 56px; } }
+.cmap svg text { font-size: 13px; }
+.cmap .node rect { fill:var(--surface); stroke:var(--rule); cursor:pointer; }
+.cmap .node.sel rect { stroke: var(--brand); stroke-width: 2; fill:var(--tint); }
+.cmap .mine { stroke: var(--brand); stroke-width: 2; }
+.cmap .expert { stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.anim-row { display:flex; gap: 10px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 18px; margin: 14px 0 6px; flex-wrap: wrap; }
+.anim-row span { padding: 2px 4px; border-radius: 4px; transition: background .25s, outline-color .25s; outline: 2px dashed transparent; }
+.anim-row span.on { background: var(--mark); }
+.anim-row span.next { outline-color: var(--warn); }
+.anim-step { font-size: 13.5px; min-height: 2.6em; color: var(--color-base-content); }
+/* feature sketch */
+.flow { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+@media (max-width: 760px) { .flow { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 420px) { .flow { grid-template-columns: 1fr; } }
+.frame { border:1px solid var(--rule); border-radius: 10px; padding: 10px; background:var(--surface); transition: border-color .3s, box-shadow .3s, opacity .3s; opacity: .55; }
+.frame.on { border-color: var(--brand); box-shadow: 0 0 0 3px color-mix(in oklab, var(--brand) 12%, transparent); opacity: 1; }
+.frame .step { font-size: 11.5px; font-weight: 700; color: var(--brand); letter-spacing: .05em; text-transform: uppercase; }
+.frame .scr { margin-top: 8px; border-radius: 8px; background: var(--color-neutral); color: var(--color-neutral-content); padding: 10px; font-size: 12.5px; line-height: 1.45; min-height: 128px; }
+.frame .scr.light { background:var(--color-base-200); color:var(--color-base-content); border:1px solid var(--rule); }
+.frame .scr .sel { background: var(--mark); color:var(--color-base-content); }
+.frame .scr .muted2 { color: color-mix(in oklab, currentColor 60%, transparent); font-size: 11.5px; }
+.frame .scr .field { margin-top: 6px; border:1px solid color-mix(in oklab, var(--color-neutral-content) 30%, var(--color-neutral)); border-radius: 5px; padding: 4px 6px; color: color-mix(in oklab, var(--color-neutral-content) 80%, var(--color-neutral)); min-height: 34px; }
+.frame .scr mark { background: color-mix(in oklab, var(--brand) 65%, var(--color-neutral-content)); color: var(--color-neutral-content); border-radius: 3px; padding: 0 2px; }
+.frame .scr .btns { display:flex; gap: 6px; margin-top: 8px; }
+.frame .scr .btns span { border:1px solid color-mix(in oklab, var(--color-neutral-content) 40%, var(--color-neutral)); border-radius: 99px; padding: 1px 8px; font-size: 11.5px; }
+.frame .scr .menu { margin-top: 6px; background:var(--surface); border:1px solid var(--rule); border-radius: 6px; padding: 6px 8px; box-shadow: 0 4px 12px color-mix(in oklab, var(--color-base-content) 8%, transparent); }
+.frame p { font-size: 12.5px; margin-top: 8px; color: var(--color-base-content); }
+@media (prefers-reduced-motion: reduce) { .frame { opacity: 1; transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<p class="eyebrow">Reading for Nerds · research · Nov 7 · companion to <a href="reading-methods.html">Reading methods</a></p>
+<h1>To learn from a passage, make yourself recall, explain or work with it: in the checked studies that gains two to three times more than swapping the text for video or VR</h1>
+
+<div class="box mt-6">
+  <div class="legend mb-3"><span><i style="background:var(--brand)"></i>you do the work</span><span><i style="background:var(--faint)"></i>it is shown to you</span><span><i style="background:repeating-linear-gradient(135deg,var(--brand) 0 3px,color-mix(in oklab, var(--brand) 55%, var(--surface)) 3px 5px)"></i>* figure not checked against the paper</span></div>
+  <div class="es play" id="es" role="img" aria-label="Effect sizes on learning from meta-analyses. Doing the work: scaffolded simulations 0.85, tutoring that checks each step 0.76, building a concept map 0.72 (not checked), retrieval practice 0.61 (not checked), self-explanation 0.55. Being shown: a ready-made concept map 0.43 (not checked), video replacing teaching 0.28, VR 0.24, animation 0.23 (not checked)."></div>
+  <p class="caption">Effect size: 0.2 small, 0.5 medium, 0.8 large. Each bar is a different meta-analysis with its own comparison, so the ratio is loose; checked bars alone give 0.55–0.85 against 0.24–0.28, or 2.0–3.5×.</p>
+</div>
+
+<p class="problem mt-5"><b>Problem:</b>
+You asked how to turn a highlighted passage into understanding, and whether richer media make reading obsolete.
+Done is what studies measured, ranked for an app built on "highlight, press a key", with a demo of each, a test of Apple's free on-device model, and a sketch of the feature.
+It needs two choices from you: whether learning belongs in this app at all, and if so, which feature comes first.</p>
+
+<section>
+<p class="eyebrow">1 · The words this page uses</p>
+<h2>Feeling that you understood and having learned are different measurements, and they often disagree</h2>
+<div class="cmp-two grid2">
+  <div class="box"><p class="eyebrow">Feels like learning</p><p class="mt-2">Rereading, a clear summary, a fluent AI explanation.<br>High comfort, weak on a test a week later.</p></div>
+  <div class="box" style="border-color:color-mix(in oklab, var(--brand) 40%, transparent);background:var(--tint)"><p class="eyebrow">Is learning</p><p class="mt-2">Recalling it, explaining it, predicting, building something with it.<br>More effort, stronger on a test a week later.</p></div>
+</div>
+<ul class="dots prose mt-4">
+<li><b>Effect size (g or d)</b>: the gain measured in standard deviations (SD) of the comparison group, so studies can be compared. 0.2 is small, 0.5 medium, 0.8 large; 0.5 moves an average learner to about the 69th percentile.</li>
+<li><b>Meta-analysis</b>: a study that pools the results of many studies into one effect size. <b>Randomised</b>: people were assigned to groups by chance. <b>Preregistered</b>: the analysis plan was filed before the data came in. <b>n</b>: the number of people.</li>
+<li><b>Delayed test</b>: a test days later. Many techniques that lose on an immediate test win on a delayed one, and that is the test that matters.</li>
+<li><b>Retrieval practice</b>: answering questions from memory instead of rereading. <b>Spacing</b>: repeating that over days instead of all at once.</li>
+<li><b>Self-explanation</b>: explaining to yourself why each step or claim holds.</li>
+<li><b>Fluency illusion</b>: ease while studying mistaken for learning. The 2024–2025 studies of AI help below hit it repeatedly.</li>
+<li><b>Expertise reversal</b>: extra explanation that helps a beginner gets in an expert's way, so help should fade as you learn a topic.</li>
+<li><b>Scaffolded</b>: with guidance built in, such as hints, worked examples or prompts, which is taken away as you improve.</li>
+</ul>
+</section>
+
+<section>
+<p class="eyebrow">2 · What this means for the reader you use today</p>
+<h2>Your RSVP reader and its voice are for getting through text; for studying it, the evidence favours reading at your own pace</h2>
+<div class="box mt-4">
+<table class="plain">
+<tr><th>Measured</th><th>Result</th><th>Source</th></tr>
+<tr><td>Reading against listening, inference questions</td><td>reading better, g = 0.36</td><td rowspan="2"><a href="https://doi.org/10.3102/00346543211060871">Clinton-Lisell 2022</a>, 46 studies, n = 4,687</td></tr>
+<tr><td>Reading against listening, when the reader set the pace</td><td>reading better, g = 0.13</td></tr>
+<tr><td>Normal reading with jumping back blocked</td><td>comprehension worse</td><td><a href="https://doi.org/10.1177/0956797614531148">Schotter, Tran &amp; Rayner 2014</a></td></tr>
+</table>
+</div>
+<p class="prose mt-3">No study tested RSVP for study directly, so applying these to our app is my inference.
+RSVP sets the pace for you and removes jumping back; ← gives back a jump to the sentence start.
+So use the reader to get through articles, and slow down or read normally when you need to remember something.</p>
+</section>
+
+<section>
+<p class="eyebrow">3 · The ranking</p>
+<h2>Ranked for our app: recall questions first, an explain-it-back tutor second; one-click summaries last</h2>
+<p class="lead">Ranked by strength of evidence, then by fit: whether it works on a single highlighted paragraph, in a minute or two, with a small on-device model.
+Evidence dots: ●●● meta-analyses; ●●○ several controlled studies or one large one; ●○○ one study, or untested in this form.</p>
+<div class="box mt-4" style="overflow-x:auto">
+<table class="ladder">
+<tr><th>#</th><th>Highlight →</th><th>Best evidence</th><th class="hide-sm">Evidence</th><th class="hide-sm">Fit</th></tr>
+<tr><td class="n">1</td><td><a href="#i-recall">questions now, asked again over days</a></td><td>retrieval and spacing rated high utility</td><td class="hide-sm ev">●●●</td><td class="hide-sm">any paragraph; the model's easiest task</td></tr>
+<tr><td class="n">2</td><td><a href="#i-explain">explain it back to a tutor that asks, not tells</a></td><td>self-explanation g = 0.55; tutoring d ≈ 0.76</td><td class="hide-sm ev">●●●</td><td class="hide-sm">any paragraph; the model must judge you</td></tr>
+<tr><td class="n">3</td><td><a href="#i-predict">predict first, then see the explanation</a></td><td>problem first, g = 0.36 (53 studies)</td><td class="hide-sm ev">●●<i>●</i></td><td class="hide-sm">claims and outcomes; seconds</td></tr>
+<tr><td class="n">4</td><td><a href="#i-map">build a concept map</a></td><td>building beats studying a given map*</td><td class="hide-sm ev">●●●</td><td class="hide-sm">poor on one paragraph; good for a chapter</td></tr>
+<tr><td class="n">5</td><td><a href="#i-analogy">an example from your own field</a></td><td>interest examples, n = 145, randomised</td><td class="hide-sm ev">●●<i>●</i></td><td class="hide-sm">any paragraph; helps beginners only</td></tr>
+<tr><td class="n">6</td><td><a href="#i-model">a model you can drag, for causal passages</a></td><td>scaffolded simulations g = 0.85; generated ones untested</td><td class="hide-sm ev">●<i>●●</i></td><td class="hide-sm">only causal passages; hard to generate</td></tr>
+<tr><td class="n">7</td><td><a href="#i-anim">a step diagram or animation, for processes only</a></td><td>animation small*; procedures large*</td><td class="hide-sm ev">●●<i>●</i></td><td class="hide-sm">only processes; hard to generate</td></tr>
+<tr><td class="n">8</td><td><a href="#i-summary">a one-click summary or simplification</a></td><td>worse than your own notes, three days later</td><td class="hide-sm ev">●●<i>●</i> against</td><td class="hide-sm">easy, and counter-productive</td></tr>
+</table>
+</div>
+<p class="caption">Concept maps have stronger evidence than predicting first but rank below it on fit: one paragraph gives too few ideas to connect. * figure not checked against the paper.</p>
+</section>
+
+<section>
+<p class="eyebrow">4 · Each idea, with a demo</p>
+<h2>Every demo uses the same passage about eye movements, so each one teaches you the same thing a different way</h2>
+
+<div class="method" id="i-recall">
+<h3><span class="rank">1</span> Questions now, asked again over days <span class="tag works">Strongest</span></h3>
+<div class="grid2">
+  <div class="demo" id="quiz">
+    <div class="controls"><button type="button" data-hide>Hide the passage and test me</button></div>
+    <div class="para" data-passage></div>
+    <div class="quiz-qs" hidden>
+      <p class="q">1. Where in reading does most of the work happen?</p>
+      <textarea aria-label="Your answer to question 1"></textarea>
+      <p class="q">2. Why do the eyes sometimes jump backwards?</p>
+      <textarea aria-label="Your answer to question 2"></textarea>
+      <div class="controls mt-2"><button type="button" data-check>Check against the passage</button></div>
+    </div>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> pulling an idea out of memory strengthens it and shows you what you missed; spreading those pulls over days makes them last.</p>
+    <ul class="dots mt-2">
+      <li>Rereading won on a test five minutes later; testing yourself won on the delayed tests, two days and a week later. <a href="https://doi.org/10.1111/j.1467-9280.2006.01693.x">Roediger &amp; Karpicke 2006</a></li>
+      <li>Practice testing and spacing were the two techniques rated high utility in the major review of ten study techniques; rereading, summarising and highlighting (marking text to reread) were rated low. <a href="https://doi.org/10.1177/1529100612453266">Dunlosky et al. 2013</a></li>
+      <li>Meta-analyses: g ≈ 0.61 over 272 effect sizes (<a href="https://doi.org/10.3102/0034654316689306">Adesope et al. 2017</a>), g = 0.50 (Rowland 2014). Both figures are from summaries, not checked against the papers.</li>
+      <li>Questions written by an LLM beat no retrieval practice in a classroom study of about 60 students; not randomised (fixed week order, different material each week). <a href="https://arxiv.org/pdf/2507.05629">Preprint, 2025</a></li>
+    </ul>
+  </div>
+</div>
+<div class="pc"><div class="pro"><b>Pros</b><br>The most replicated effect in the field. The model's easiest task: it wrote mostly usable questions for all five passages tried (section 6).</div><div class="con"><b>Cons</b><br>The benefit shows only days later, and it feels harder than rereading. Needs the app to remember passages and bring them back.</div></div>
+</div>
+
+<div class="method" id="i-explain">
+<h3><span class="rank">2</span> Explain it back to a tutor that asks, not tells <span class="tag works">Strong</span></h3>
+<div class="grid2">
+  <div class="demo" id="explain">
+    <div class="para" data-passage style="font-size:14px"></div>
+    <p class="q">In your own words: if the eyes spend so little time moving, what is the reader doing most of the time, and why go back?</p>
+    <textarea class="mt-2" aria-label="Your explanation"></textarea>
+    <div class="controls mt-2"><button type="button" data-compare>Compare with the key points</button></div>
+    <div class="reveal">
+      <p class="caption" style="margin-top:0">Tick the ones your explanation covered. A tutor would ask you about the ones you missed, rather than tell you.</p>
+      <label class="block mt-1"><input type="checkbox"> The work happens in the pauses on each word.</label>
+      <label class="block mt-1"><input type="checkbox"> The jumps between words are quick hops.</label>
+      <label class="block mt-1"><input type="checkbox"> Going back checks a word that was passed too quickly.</label>
+    </div>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> producing your own "why" builds connected understanding; a tutor that prompts instead of answering keeps you doing that work.</p>
+    <ul class="dots mt-2">
+      <li>Self-explanation prompts: g = 0.55 over 69 effect sizes; the authors call for computer-generated prompts as the next step. <a href="https://doi.org/10.1007/s10648-018-9434-x">Bisra et al. 2018</a></li>
+      <li>Human tutors d = 0.79; computer tutors that check each step of your work d = 0.76. <a href="https://doi.org/10.1080/00461520.2011.611369">VanLehn 2011</a></li>
+      <li>Harvard physics, n = 194, each student had both conditions: a GPT-4 tutor built on teaching best practice beat an active-learning class; the authors put the gain at 0.73–1.3 SD. No delayed test. How strictly the tutor held back answers is in a supplement I did not read. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12179260/">Kestin et al. 2025</a></li>
+      <li>About 1,000 Turkish high-school students: plain GPT-4 lifted practice scores 48% but the unaided exam fell 17% against control; a version with tutoring rules lifted practice 127% and left the exam even. <a href="https://doi.org/10.1073/pnas.2422633122">Bastani et al. 2025</a></li>
+    </ul>
+  </div>
+</div>
+<div class="pc"><div class="pro"><b>Pros</b><br>Tutoring is one of the largest effects in education, and a language model makes it available on any passage.</div><div class="con"><b>Cons</b><br>Only works if the tutor holds back answers, and the model must judge your explanation, a harder task than writing questions. Typing takes time.</div></div>
+</div>
+
+<div class="method" id="i-predict">
+<h3><span class="rank">3</span> Predict first, then see the explanation <span class="tag works">Promising</span></h3>
+<div class="grid2">
+  <div class="demo" id="predict">
+    <p class="q" style="margin-top:0">Guess first: if your eyes never had to move at all, how much faster could you read?</p>
+    <div class="opts-row"><button type="button" class="pick" data-a="big">About 5×</button><button type="button" class="pick" data-a="mid">About 2×</button><button type="button" class="pick" data-a="small">About 10%</button></div>
+    <div class="reveal">
+      <p class="mt-3"><b>About 10%.</b> A stop on a word lasts about 250 ms and a jump about 30 ms, so jumps are 30 / (250 + 30) ≈ 11% of the time. Figures from the review by Rayner et al. 2016, cited on the companion page. RSVP also shows the words your eyes would skip, so it gives some of that back.</p>
+    </div>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> committing to a guess makes you notice the gap the explanation fills. On a highlighted passage, the app would ask you to predict its claim or outcome from the first sentence.</p>
+    <ul class="dots mt-2">
+      <li>Preregistered, n = 1,200, SAT-style maths: GPT-4 explanations beat answer-only, and helped most when people tried the problem first; even explanations with errors beat answer-only. Short-term test only. <a href="https://papers.ssrn.com/abstract=4641653">Kumar, Rothschild, Goldstein &amp; Hofman</a> (not checked against the paper; the page was unreachable)</li>
+      <li>Trying a problem before being taught ("productive failure") beat teaching first: 53 studies, g = 0.36. <a href="https://doi.org/10.3102/00346543211019105">Sinha &amp; Kapur 2021</a></li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<div class="method" id="i-map">
+<h3><span class="rank">4</span> Build a concept map <span class="tag works">Strong</span></h3>
+<div class="grid2">
+  <div class="demo cmap" id="cmap">
+    <div class="controls"><span>Click two ideas to link them.</span><button type="button" data-expert>Show an expert's links</button><button type="button" data-clear>Clear</button></div>
+    <svg viewBox="0 0 420 230" width="100%" role="img" aria-label="Concept map you can build: stopping on a word, jumping ahead, jumping back, preview, understanding"></svg>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> deciding how ideas connect forces you to work out the structure, which a list of facts hides.</p>
+    <ul class="dots mt-2">
+      <li>Concept maps and knowledge retention: 55 studies, n = 5,818. <a href="https://doi.org/10.3102/00346543076003413">Nesbit &amp; Adesope 2006</a></li>
+      <li>142 effect sizes, n = 11,814: concept maps g = 0.58 overall; building one g = 0.72, studying a ready-made one g = 0.43. <a href="https://doi.org/10.1007/s10648-017-9403-9">Schroeder et al. 2018</a> (figures from summaries; the paper was unreachable)</li>
+    </ul>
+  </div>
+</div>
+<div class="pc"><div class="pro"><b>Pros</b><br>The app could suggest the ideas and leave the linking to you.</div><div class="con"><b>Cons</b><br>Slow for a single paragraph; better for a chapter. Handing you a finished map loses much of the gain.</div></div>
+</div>
+
+<div class="method" id="i-analogy">
+<h3><span class="rank">5</span> An example from your own field <span class="tag some">Helps beginners</span></h3>
+<div class="grid2">
+  <div class="demo" id="analogy">
+    <div class="opts-row" style="margin-top:0"><button type="button" class="pick" data-v="plain" aria-pressed="true">Original</button><button type="button" class="pick" data-v="code">For a programmer</button><button type="button" class="pick" data-v="music">For a musician</button></div>
+    <div class="para mt-3" data-out></div>
+    <p class="caption">Hand-written for this demo; in the app the model would write it from what you tell it you know.</p>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> tying a new idea to something you already know lowers the load and raises interest.</p>
+    <ul class="dots mt-2">
+      <li>145 ninth-graders, randomised: algebra problems rewritten around each student's interests made them faster and more accurate, and the gain carried to later plain problems; students who were struggling gained most. <a href="https://doi.org/10.1037/a0031882">Walkington 2013</a></li>
+      <li>Meta-analysis: retention g = 0.48, transfer g = 0.36, from only 6 effect sizes. <a href="https://doi.org/10.1007/s10648-024-09933-7">Lin et al. 2024</a> (figures from summaries, not checked)</li>
+      <li>Limits: extra explanation that helps beginners hurts experts (<a href="https://doi.org/10.1007/s10648-007-9054-3">Kalyuga 2007</a>), and interesting but irrelevant detail reduces learning (<a href="https://doi.org/10.1007/s10648-020-09522-4">Sundararajan &amp; Adesope 2020</a>).</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<div class="method" id="i-model">
+<h3><span class="rank">6</span> A model you can drag, for causal passages <span class="tag untested">Untested when generated</span></h3>
+<div class="grid2">
+  <div class="demo" id="model">
+    <div class="sl"><label for="m-fix">Time stopped on a word</label><input id="m-fix" type="range" min="120" max="350" step="10" value="250"><output>250 ms</output></div>
+    <div class="sl"><label for="m-skip">Words skipped</label><input id="m-skip" type="range" min="0" max="50" step="5" value="30"><output>30%</output></div>
+    <div class="sl"><label for="m-reg">Jumps back</label><input id="m-reg" type="range" min="0" max="25" step="1" value="12"><output>12%</output></div>
+    <div class="sl"><label for="m-sac">Eye jumps</label><input id="m-sac" type="range" min="0" max="40" step="5" value="30"><output>30 ms</output></div>
+    <div class="mt-3"><span class="model-out" data-wpm>—</span> <span class="muted">wpm</span> <span class="muted" data-delta></span></div>
+    <div class="stack"><div data-s="fix" style="background:var(--brand)">stopped</div><div data-s="sac" style="background:var(--quiet)">jumps</div></div>
+    <p class="caption">A simplified model built from the review's averages, not a study. RSVP sets jumps, skipping and jumping back all to 0: try that, then just the jumps.</p>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> changing one cause and watching the effect builds intuition that prose describes but does not give.</p>
+    <ul class="dots mt-2">
+      <li>Simulations in higher education, 145 studies: g = 0.85, larger with scaffolding; beginners gained from worked examples, advanced learners from reflection. <a href="https://doi.org/10.3102/0034654320933544">Chernikova et al. 2020</a></li>
+      <li>Students who built circuits in a computer simulation instead of with real kit did better on a conceptual test, and then on building a real circuit. <a href="https://doi.org/10.1103/PhysRevSTPER.1.010103">Finkelstein et al. 2005</a></li>
+      <li>"Explorable explanations" (Bret Victor, 2011) and Distill's interactive-article survey (<a href="https://distill.pub/2020/communicating-with-interactive-articles/">Hohman et al. 2020</a>) are an essay and a design survey, not controlled studies.</li>
+      <li><b>Models generated from a passage by a language model: no controlled learning study found.</b></li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<div class="method" id="i-anim">
+<h3><span class="rank">7</span> A step diagram or animation, for processes only <span class="tag some">Small, except procedures</span></h3>
+<div class="grid2">
+  <div class="demo" id="anim">
+    <div class="controls"><button type="button" data-step>Next step</button><button type="button" data-play aria-pressed="false">Play</button></div>
+    <div class="anim-row"><span>They</span><span>jump</span><span>from</span><span>word</span><span>to</span><span>word.</span></div>
+    <p class="anim-step" aria-live="polite">Press Next step to walk through one cycle of reading.</p>
+  </div>
+  <div class="study">
+    <p><b>How it works:</b> showing change as change, rather than describing it.</p>
+    <ul class="dots mt-2">
+      <li>26 studies: animation beat static pictures, d = 0.37; for physical procedures d = 1.06; decorative animation added nothing. <a href="https://doi.org/10.1016/j.learninstruc.2007.09.013">Höffler &amp; Leutner 2007</a> (figures from summaries, not checked)</li>
+      <li>61 studies, n = 7,036: g = 0.23 overall. <a href="https://doi.org/10.1016/j.compedu.2016.06.005">Berney &amp; Bétrancourt 2016</a> (not checked)</li>
+      <li>Many animation benefits vanish when the static version carries the same information; animations are often too fast to follow. <a href="https://doi.org/10.1006/ijhc.2002.1017">Tversky, Morrison &amp; Bétrancourt 2002</a> (not checked)</li>
+    </ul>
+  </div>
+</div>
+<p class="fit"><b>Why Next step comes first:</b> letting you set the pace of each segment is one of Mayer's design rules for multimedia learning ("segmenting").</p>
+</div>
+
+<div class="method" id="i-summary">
+<h3><span class="rank">8</span> A one-click summary or simplification <span class="tag none">Avoid as a default</span></h3>
+<div class="study">
+  <p><b>How it works:</b> the model does the reading for you, which is exactly the effort that produces learning.</p>
+  <ul class="dots mt-2">
+    <li>Preregistered, n = 405, ages 14–15, tested three days later: studying with an LLM alone did worse on comprehension and retention than taking notes, or notes plus the LLM; students preferred the LLM. <a href="https://www.microsoft.com/en-us/research/publication/effects-of-llm-use-and-note-taking-on-reading-comprehension-and-memory-a-randomised-experiment-in-secondary-schools/">Kreijkes et al. 2025</a></li>
+    <li>n = 91 university students, randomised: ChatGPT lowered effort against web search, and their written reasoning was weaker. <a href="https://doi.org/10.1016/j.chb.2024.108386">Stadler, Bannert &amp; Sailer 2024</a></li>
+    <li>Summarising is rated low utility as a study technique. <a href="https://doi.org/10.1177/1529100612453266">Dunlosky et al. 2013</a></li>
+    <li>Meta-analyses claiming "ChatGPT improves learning" are unreliable: at least one has been retracted (from the research summary; citation not checked here).</li>
+  </ul>
+</div>
+</div>
+</section>
+
+<section>
+<p class="eyebrow">5 · Is reading obsolete?</p>
+<h2>Swapping text for another medium gains a little; making the reader act gains more</h2>
+<div class="grid2">
+  <div class="box"><p class="eyebrow">What text does well</p>
+    <ul class="dots mt-2"><li>You set the pace, jump anywhere and look back.</li><li>Dense, precise, searchable.</li><li>Beats listening on inference questions (section 2).</li></ul></div>
+  <div class="box"><p class="eyebrow">What text does badly</p>
+    <ul class="dots mt-2"><li>Change over time: animation helps, most for physical procedures.</li><li>Spatial and causal structure: diagrams and maps help.</li><li>Intuition for a system: scaffolded simulations help.</li></ul></div>
+</div>
+<div class="mt-4" style="overflow-x:auto">
+<table class="plain">
+<tr><th>Medium</th><th>Compared with</th><th>Effect</th><th>Source</th></tr>
+<tr><td>Video</td><td>other teaching (swapped in)</td><td>0.28; as an add-on, 0.80</td><td><a href="https://doi.org/10.3102/0034654321990713">Noetel et al. 2021</a>, 105 randomised trials</td></tr>
+<tr><td>VR</td><td>non-immersive teaching</td><td>0.24; one study found more presence and less learning</td><td><a href="https://doi.org/10.1111/bjet.13023">Wu, Yu &amp; Gu 2020</a>; Makransky et al. 2019</td></tr>
+<tr><td>Animation</td><td>static pictures</td><td>0.23–0.37 (not checked)</td><td>Berney &amp; Bétrancourt 2016; Höffler &amp; Leutner 2007</td></tr>
+<tr><td>Games</td><td>non-game teaching</td><td>0.33</td><td><a href="https://doi.org/10.3102/0034654315582065">Clark et al. 2016</a>, 57 comparisons</td></tr>
+</table>
+</div>
+<p class="prose mt-4">None of these compares the medium with a reader who works with the text, which is where the larger effects in section 3 sit.
+So the claim the studies support is narrower than "reading is obsolete": reading passively is a weak way to learn, and the bigger upgrade is to make the reader produce something.
+The medium matters for content about change, space or systems, and there too the best formats ask you to act.</p>
+</section>
+
+<section>
+<p class="eyebrow">6 · Can our app do this for free?</p>
+<h2>Apple's on-device model runs on this Mac and wrote mostly usable recall questions for five passages, in 1 to 9 seconds each</h2>
+<div class="box mt-4" style="overflow-x:auto">
+<table class="plain">
+<tr><th>Passage, run Nov 7 on the M1 Pro Mac, macOS 26.5.2</th><th>Time</th><th>Questions</th></tr>
+<tr><td>The eye-movement passage on this page (first run)</td><td>3.0 s</td><td>2 good, 1 muddled: "How long does each word typically remain on the page?"</td></tr>
+<tr><td>Photosynthesis, 83 words</td><td>8.6 s</td><td>3 usable, all literal ("What are the two stages…?"); none asks why the cycle stops in the dark, the passage's point</td></tr>
+<tr><td>TCP handshake, 89 words</td><td>7.6 s</td><td>3 good, including "How do random initial sequence numbers enhance security?"</td></tr>
+<tr><td>Opportunity cost, 96 words</td><td>1.2 s</td><td>3 good</td></tr>
+<tr><td>Bayes' rule, 101 words</td><td>4.6 s</td><td>2 good, 1 muddled: it asks how prevalence affects the test's "accuracy", which it does not</td></tr>
+</table>
+</div>
+<p class="caption">The four longer passages were written for the test, in textbook style. The fact judge reran the first passage and got 2.6 s and 1.5 s, with three usable questions each time.</p>
+<ul class="dots prose mt-3">
+<li><b>What it is:</b> part of macOS 26 (the FoundationModels framework), so no package to add and no cost, and the text stays on the Mac.</li>
+<li><b>What it is not:</b> something you can read inside. It is an Apple system service, the same kind of part as the voice you already use. What we would write, and you could follow, is the prompt, the store and the schedule.</li>
+<li><b>Where it runs:</b> Macs that support Apple Intelligence, on macOS 26; I tested only this one. The app supports macOS 14, so the learning key would appear only where the model exists.</li>
+<li><b>Quality:</b> 13 of 15 questions usable, but mostly literal recall; judging your explanations (idea 2) is a harder task and untested.</li>
+</ul>
+</section>
+
+<section>
+<p class="eyebrow">7 · What the first feature would look like</p>
+<h2>Idea 1 in the app: a second key asks you two or three questions, then brings the passage back after 1, 3 and 7 days</h2>
+<div class="box mt-4">
+<div class="flow" id="flow">
+  <div class="frame"><span class="step">1 · Select</span><div class="scr light">…the Calvin cycle <span class="sel">depends on ATP and NADPH, so it slows within seconds when the light is switched off</span>…</div><p>Select text in any app and press the learning key, a second shortcut you choose.</p></div>
+  <div class="frame"><span class="step">2 · Answer</span><div class="scr"><span class="muted2">Question 1 of 3</span><br>Why does the Calvin cycle slow when the light goes off?<div class="field">it runs out of…</div></div><p>The same floating panel as the reader. The passage is hidden; you type an answer.</p></div>
+  <div class="frame"><span class="step">3 · Check</span><div class="scr">…so it <mark>slows within seconds when the light is switched off</mark>…<div class="btns"><span>Got it</span><span>Missed it</span></div></div><p>The passage comes back with the answer marked; you say whether you had it.</p></div>
+  <div class="frame"><span class="step">4 · Day 3</span><div class="scr light">👓 •<div class="menu">Review 2 passages<br><span class="muted2">Read Selection ⌃⌥R</span></div></div><p>A dot on the menu-bar glasses icon (it exists today) says passages are due; reviewing asks the questions again.</p></div>
+</div>
+<p class="caption">A sketch, not a design. Answers stay on the Mac in one local file; nothing is checked by the model in this version.</p>
+</div>
+</section>
+
+<section>
+<p class="eyebrow">8 · Decisions</p>
+<h2>Two choices: whether learning belongs in this app, then which feature comes first</h2>
+<div class="decision">
+<p class="eyebrow">First · Scope</p>
+<h3>Should Reading for Nerds get a learning key at all?</h3>
+<p class="prose mt-2">The app is 679 lines today, with one key and nothing stored.
+Idea 1 adds a question panel, a local store of passages, a review schedule and a call to the model: my estimate is 250 to 400 more lines, plus an Apple service you cannot read inside.</p>
+<div class="opts">
+  <div class="opt rec"><span class="badge-rec">Recommended</span><b>Yes, as a second key</b>It reuses the hotkey, selection and panel layers you already own, and the model is the same kind of part as the voice. The reader stays as it is.</div>
+  <div class="opt"><b>A separate small app</b>Keeps the reader at one purpose, but duplicates the hotkey and selection layers.</div>
+  <div class="opt"><b>Not now</b>Keep the app a reader; this page stays as research.</div>
+</div>
+</div>
+<div class="decision">
+<p class="eyebrow">Second · First feature, if yes</p>
+<h3>What should the learning key do with a selected passage?</h3>
+<div class="opts">
+  <div class="opt rec"><span class="badge-rec">Recommended</span><b>Questions now, asked again over days</b>Best-replicated effect, and the model only writes questions, the task it did best above. Sketched in section 7.</div>
+  <div class="opt"><b>Explain it back</b>Strong effect, but the model must judge your explanation and hold back answers; that needs its own test first.</div>
+  <div class="opt"><b>Predict first, then explain</b>Fast, and works on claims and outcomes; evidence is one meta-analysis (g = 0.36) and one large study I could not read.</div>
+</div>
+</div>
+</section>
+
+<section>
+<p class="eyebrow">9 · Plan</p>
+<h2>If yes and questions: build it, then test it against plain reading on your own passages</h2>
+<ol class="dots prose mt-3" style="list-style:decimal;padding-left:1.4em">
+<li>The learning key, the question panel and the local store, shown only on Macs where the model is available.</li>
+<li>Reviews after 1, 3 and 7 days from the menu-bar icon.</li>
+<li>The test: alternate passages, so half get questions and half are only read once in the reader. On day 7 the app quizzes you on both halves with the same kind of question.</li>
+<li>After about 20 passages, keep it if the question half is clearly ahead; drop it if they are level. One reader is a noisy test, so a small gap means nothing.</li>
+</ol>
+</section>
+
+<section>
+<details>
+<summary>Not verified, and gaps in the literature</summary>
+<ul class="dots">
+<li>Figures from summaries, not checked against the papers: Adesope and Rowland; Schroeder; Lin 2024; Höffler &amp; Leutner, Berney &amp; Bétrancourt, Tversky; Kumar et al.</li>
+<li>The exact questions from the first model run were not saved, so the fact judge could not check them; its reruns gave usable questions.</li>
+<li>Which Macs support Apple Intelligence was not checked here; only this one was tested.</li>
+<li>Google's "Learn Your Way" (n = 60, a preprint by Google) turns a chapter into personalised text, maps, audio and quizzes and beat a PDF reader, but every participant used the quizzes, so what caused the gain is unknown.</li>
+<li>No controlled study found for: LLM-written self-explanation prompts on prose; LLM-generated diagrams, animations or simulations; RSVP for study.</li>
+</ul>
+</details>
+<details id="reader-review">
+<summary>Reader review · 15 items, 37 claims · Nov 7</summary>
+<p>Two fresh Opus agents, in parallel: a reviewer playing the reader, holding only his two reader files, the seen list below and the page; a fact judge holding the app's code, this Mac and the cited papers. Reviewer's verdict: "Not yet. I could pick A, but I&#x27;d be approving a feature I can&#x27;t picture, in an app whose simplicity rule the page never weighs, with a success test that can&#x27;t fail."</p>
+<table class="plain">
+<tr><th>#</th><th>Reviewer item</th><th>Answer</th></tr>
+<tr><td>1</td><td>D3 assumes he wants a learning feature at all; the model is a black box.</td><td>Fixed: a new first decision asks whether learning belongs in the app, with cost (679 lines today, estimate 250–400 more) and the black-box point stated.</td></tr>
+<tr><td>2</td><td>He can't picture option A; the menu-bar icon is unknown to him.</td><td>Fixed: new section 7, an animated four-frame sketch; the icon is said to exist (main.swift:20, checked by the judge).</td></tr>
+<tr><td>3</td><td>The day-7 test can't fail.</td><td>Fixed: the plan alternates passages, quizzes both halves and states keep and drop rules.</td></tr>
+<tr><td>4</td><td>The headline makes the comparison the caption forbids; unverified bars.</td><td>Fixed: the caption gives the working from checked bars only (2.0–3.5×, confirmed by the judge); unchecked bars are hatched and starred.</td></tr>
+<tr><td>5</td><td>Fit is never shown in the ranking.</td><td>Fixed: fit column added, with a line on why predicting ranks above concept maps.</td></tr>
+<tr><td>6</td><td>Section 4's headline contradicts its table.</td><td>Fixed: new heading, and a column naming each comparison group.</td></tr>
+<tr><td>7</td><td>The finding that RSVP is weak for study is buried.</td><td>Fixed: new section 2 with the studies, near the top.</td></tr>
+<tr><td>8</td><td>The model test was one passage on an unnamed Mac.</td><td>Fixed: reran on four more passages (13 of 15 questions usable, 1.2–8.6 s), named the Mac (M1 Pro, macOS 26.5.2); which Macs support it is marked unchecked.</td></tr>
+<tr><td>9</td><td>Figures "from the researcher's memory".</td><td>Fixed: Roediger's percentages removed; Clark's games figure checked by the judge (0.33).</td></tr>
+<tr><td>10</td><td>The drag model's RSVP ceiling ignores skipping and going back; the predict answer is circular.</td><td>Fixed: caption asks you to set all three as RSVP does; the predict answer shows its arithmetic and source.</td></tr>
+<tr><td>11</td><td>Terms undefined: step-based tutoring, scaffolded, preregistered and others.</td><td>Fixed: added to section 1 or replaced with plain words.</td></tr>
+<tr><td>12</td><td>Option C described inconsistently and judged on feel.</td><td>Fixed: same evidence in both places (g = 0.36, checked); "feel good" removed; what you'd predict is stated.</td></tr>
+<tr><td>13</td><td>"Highlighting" means two things.</td><td>Fixed: the app's gesture is "select" where it could clash; the caption no longer names highlighting.</td></tr>
+<tr><td>14</td><td>The explain-back demo needs the companion page.</td><td>Fixed: the demo shows the passage and asks what it answers.</td></tr>
+<tr><td>15</td><td>The fonts bar and D numbering are noise.</td><td>Fixed: the fonts bar (unverified, no DOI) removed; decisions are "First" and "Second".</td></tr>
+</table>
+<table class="plain mt-3">
+<tr><th>#</th><th>Claim</th><th>Judge</th><th>Answer</th></tr>
+<tr><td>1</td><td>LLM-written questions: a randomised classroom study.</td><td>Wrong: quasi-experimental, ~60 students.</td><td>Fixed.</td></tr>
+<tr><td>2</td><td>Self-paced reading beats listening on inference, g = 0.36.</td><td>Wrong: as on the companion page.</td><td>Fixed.</td></tr>
+<tr><td>3</td><td>Kestin: about 0.63 SD; tutor told to give hints.</td><td>Wrong: authors give 0.73–1.3; the prompt is unchecked.</td><td>Fixed, with the supplement marked unread.</td></tr>
+<tr><td>4</td><td>Bastani's 17% is from the preprint.</td><td>Wrong: it is in the PNAS abstract.</td><td>Fixed: caveat removed.</td></tr>
+<tr><td>5–13</td><td>Adesope, Rowland, Schroeder, Lin, Höffler, Berney, Tversky, Kumar, Xie, the retracted meta-analysis.</td><td>Unsupported: sources unreachable or uncited.</td><td>Unknown: marked inline and hatched in the chart; Xie's bar removed.</td></tr>
+<tr><td>14–37</td><td>This Mac and the model, 3 s timing (reruns 2.6 s, 1.5 s), menu-bar icon, arithmetic, Dunlosky, Roediger's reversal, Bisra, VanLehn 0.79/0.76, Sinha &amp; Kapur (53 studies, g = 0.36), Nesbit, Walkington, Chernikova, Finkelstein, Kreijkes, Stadler, Noetel, Wu, Makransky, Clark, Kalyuga, Sundararajan.</td><td>Holds (VanLehn's answer-only 0.3 unsupported; macOS 14 minimum needs gating).</td><td>Holds; answer-only figure removed; gating added to section 6 and the plan.</td></tr>
+</table>
+<p>Rejected: none.</p>
+<details><summary>The seen list the reviewer held</summary><pre style="white-space:pre-wrap;font-size:12.5px"># Seen list: Reading for Nerds research pages (reading-methods.html, beyond-reading.html)
+
+## From the chat: his words, verbatim
+
+- &quot;i know that this idea is called RSVP and was tried before with the spritz app. i&#x27;m sure there&#x27;s several other approaches that were explored outside of RSVP for trying to improve the reading experience. what other solutions have people come up with? rank them on their pros and cons and include small demos / animations to help me understand the different methods. present to me in a lavish file&quot;
+- &quot;specifically i&#x27;m looking for methods that have been explored in the academic literature (i know that RSVP has studies). i&#x27;d like study backed outcomes where possible&quot;
+- &quot;I&#x27;m also sure people have specifically looked into ideas like personalizing content. So something like if I&#x27;m trying to read a textbook, how can I highlight a piece of text and optimize it for my understanding or to maximize my learning? What have people found on this? And again, I want a review of the academic literature. Looking for creativity here. So do people make animations? How are people moving beyond reading? I just think reading might be somewhat obsolete relative to much more impressive ways to very quickly understand and play with and interact with ideas.&quot;
+- Earlier, on audio: &quot;i would like this to be free and open source if possible just to keep the tool foundational and clean. not interested in introducing subscriptions at this point given how simple everything is&quot;
+- &quot;we&#x27;ll need it to be effectively real time&quot;
+- &quot;amazing this works very well. i installed the premium voice ava.&quot;
+
+## What he was told (marked as told)
+
+- Told: the app he uses: highlight text, press ⌃⌥R, words play one at a time with a red pivot letter at a fixed point; Space pauses, ↑↓ change speed by 25 wpm, ←→ jump a sentence, V toggles Apple&#x27;s voice; default speed 400 wpm.
+- Told: the voice uses Apple&#x27;s AVSpeechSynthesizer; words appear as the voice says them.
+- Told: the app has no third-party dependencies, by his choice.
+- He has used the app and the voice; he has not seen either page.
+
+## What he does NOT know
+
+- Eye-movement vocabulary: fixation, saccade, regression, parafoveal preview, optimal recognition point beyond &quot;the red letter&quot;.
+- Effect sizes (g, d), meta-analysis, delayed test, fluency illusion, expertise reversal, retrieval practice, spacing, self-explanation, productive failure, generation effect.
+- Any of the cited studies or authors (Rayner, Brysbaert, Schotter, Benedetto, Clinton-Lisell, Dunlosky, Roediger &amp; Karpicke, Bisra, VanLehn, Kestin, Bastani, Kreijkes, Schroeder, Chernikova, Mayer, Noetel, etc.).
+- Cascaded text, BeeLine Reader, Bionic Reading, Spritz&#x27;s history beyond its name.
+- Apple&#x27;s FoundationModels framework, and that it was spike-tested on his Mac (3.0 s, three questions, one muddled).
+- That the pages are numbered D1, D2 (reading-methods) and D3 (beyond-reading).
+</pre></details>
+</details>
+</section>
+
+</div>
+<script>
+const PASSAGE = "When we read, our eyes do not glide smoothly across the line. They jump from word to word in quick hops, pausing for about a quarter of a second on each stop. Most of the work happens during those pauses, and sometimes the eyes jump back to check a word they passed too quickly.";
+
+// Effect-size chart; unv marks figures not checked against the paper.
+(function () {
+  const rows = [
+    ["Simulations, scaffolded", "Chernikova 2020", .85, "act"],
+    ["Tutors that check each step", "VanLehn 2011", .76, "act"],
+    ["Building a concept map", "Schroeder 2018", .72, "act unv"],
+    ["Retrieval practice", "Adesope 2017", .61, "act unv"],
+    ["Self-explanation", "Bisra 2018", .55, "act"],
+    ["Studying a ready-made map", "Schroeder 2018", .43, "pas unv"],
+    ["Video instead of teaching", "Noetel 2021", .28, "pas"],
+    ["VR", "Wu 2020", .24, "pas"],
+    ["Animation", "Berney 2016", .23, "pas unv"],
+  ];
+  const el = document.getElementById("es");
+  el.innerHTML = rows.map(([l, s, v, k], i) =>
+    `<div class="lbl">${l}<small>${s}</small></div><div class="track"><span class="gl" style="left:20%"></span><span class="gl" style="left:50%"></span><span class="gl" style="left:80%"></span><span class="bar ${k}" style="--v:${v};--i:${i}"></span></div><div class="val">${v.toFixed(2)}${k.includes("unv") ? "*" : ""}</div>`).join("");
+})();
+
+// Shared passage boxes.
+for (const p of document.querySelectorAll("[data-passage]")) p.textContent = PASSAGE;
+
+// 1. Recall quiz.
+(function () {
+  const q = document.getElementById("quiz"), para = q.querySelector("[data-passage]"), qs = q.querySelector(".quiz-qs");
+  q.querySelector("[data-hide]").addEventListener("click", e => { para.classList.add("blur"); qs.hidden = false; e.target.disabled = true; });
+  q.querySelector("[data-check]").addEventListener("click", () => {
+    para.classList.remove("blur");
+    para.innerHTML = PASSAGE.replace("Most of the work happens during those pauses", "<mark>Most of the work happens during those pauses</mark>").replace("jump back to check a word they passed too quickly", "<mark>jump back to check a word they passed too quickly</mark>");
+  });
+})();
+
+// 2. Explain it back.
+(function () {
+  const d = document.getElementById("explain");
+  d.querySelector("[data-compare]").addEventListener("click", () => d.classList.add("shown"));
+})();
+
+// 3. Predict first.
+(function () {
+  const d = document.getElementById("predict");
+  for (const b of d.querySelectorAll(".pick")) b.addEventListener("click", () => {
+    d.querySelectorAll(".pick").forEach(x => x.setAttribute("aria-pressed", x === b));
+    d.classList.add("shown");
+  });
+})();
+
+// 4. Concept map.
+(function () {
+  const d = document.getElementById("cmap"), svg = d.querySelector("svg"), NS = "http://www.w3.org/2000/svg";
+  const nodes = { fix: ["Stopping on a word", 110, 40], jump: ["Jumping ahead", 320, 40], back: ["Jumping back", 70, 190], side: ["Preview", 330, 190], und: ["Understanding", 210, 115] };
+  const expert = [["fix", "und"], ["back", "und"], ["side", "jump"], ["side", "fix"], ["jump", "fix"]];
+  const links = svg.appendChild(document.createElementNS(NS, "g"));
+  const ex = svg.appendChild(document.createElementNS(NS, "g"));
+  let sel = null; const made = new Set();
+  const line = (a, b, cls, g) => { const l = document.createElementNS(NS, "line"); const [, x1, y1] = nodes[a], [, x2, y2] = nodes[b]; Object.entries({ x1, y1, x2, y2, class: cls }).forEach(([k, v]) => l.setAttribute(k, v)); g.appendChild(l); };
+  for (const [id, [label, x, y]] of Object.entries(nodes)) {
+    const g = document.createElementNS(NS, "g"); g.setAttribute("class", "node"); g.setAttribute("tabindex", "0"); g.setAttribute("role", "button"); g.setAttribute("aria-label", label);
+    const w = label.length * 7.2 + 20;
+    g.innerHTML = `<rect x="${x - w / 2}" y="${y - 15}" width="${w}" height="30" rx="15"/><text x="${x}" y="${y + 4.5}" text-anchor="middle">${label}</text>`;
+    const pick = () => {
+      if (!sel) { sel = id; g.classList.add("sel"); return; }
+      const key = [sel, id].sort().join("-");
+      if (sel !== id && !made.has(key)) { made.add(key); line(sel, id, "mine", links); }
+      svg.querySelectorAll(".node").forEach(n => n.classList.remove("sel")); sel = null;
+    };
+    g.addEventListener("click", pick); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+    svg.appendChild(g);
+  }
+  const showEx = d.querySelector("[data-expert]");
+  showEx.addEventListener("click", () => { ex.innerHTML = ""; if (showEx.textContent.startsWith("Show")) { expert.forEach(([a, b]) => line(a, b, "expert", ex)); showEx.textContent = "Hide the expert's links"; } else showEx.textContent = "Show an expert's links"; });
+  d.querySelector("[data-clear]").addEventListener("click", () => { links.innerHTML = ""; made.clear(); });
+})();
+
+// 5. Analogy variants (hand-written).
+(function () {
+  const d = document.getElementById("analogy"), out = d.querySelector("[data-out]");
+  const V = {
+    plain: PASSAGE,
+    code: "Reading works like a CPU pipeline that stalls on every instruction. The eye fetches a word, stalls about 250 ms while it decodes it, then jumps roughly seven characters ahead. When the decode turns out wrong, it rolls back to an earlier word, like a branch misprediction. The stalls, not the jumps, are where the time goes.",
+    music: "Reading works like sight-reading a score. The eye lands on a group of notes and holds while you play them, then glances ahead to the next bar. Now and then it flicks back to recheck an accidental it rushed past. The holding, not the glancing, is where the time goes.",
+  };
+  for (const b of d.querySelectorAll(".pick")) b.addEventListener("click", () => {
+    d.querySelectorAll(".pick").forEach(x => x.setAttribute("aria-pressed", x === b));
+    out.textContent = V[b.dataset.v];
+  });
+  out.textContent = V.plain;
+})();
+
+// 6. Reading-time model: time per word = fixations per word × (fixation + jump time).
+(function () {
+  const d = document.getElementById("model");
+  const get = id => +d.querySelector("#" + id).value;
+  const wpmOf = (fix, skip, reg, sac) => { const fixPerWord = (1 - skip / 100) * (1 + reg / 100); return 60000 / (fixPerWord * (fix + sac)); };
+  const base = wpmOf(250, 30, 12, 30);
+  const update = () => {
+    const [fix, skip, reg, sac] = ["m-fix", "m-skip", "m-reg", "m-sac"].map(get);
+    d.querySelectorAll(".sl output").forEach((o, i) => o.textContent = [fix + " ms", skip + "%", reg + "%", sac + " ms"][i]);
+    const w = wpmOf(fix, skip, reg, sac);
+    d.querySelector("[data-wpm]").textContent = Math.round(w);
+    const pct = Math.round((w / base - 1) * 100);
+    d.querySelector("[data-delta]").textContent = pct === 0 ? "(the review's averages)" : `(${pct > 0 ? "+" : ""}${pct}% against the averages)`;
+    d.querySelector("[data-s=fix]").style.flexGrow = fix; d.querySelector("[data-s=sac]").style.flexGrow = sac || .0001;
+  };
+  d.querySelectorAll("input").forEach(i => i.addEventListener("input", update)); update();
+})();
+
+// 7. Step-through animation of one reading cycle.
+(function () {
+  const d = document.getElementById("anim"), words = [...d.querySelectorAll(".anim-row span")], text = d.querySelector(".anim-step");
+  const steps = [];
+  [[0, 1], [1, 3], [3, 5]].forEach(([a, b]) => steps.push(
+    { on: a, next: null, say: `The eye stops on "${words[a].textContent}".` },
+    { on: a, next: null, say: "About 250 ms pass while the word is recognised and fitted into the sentence." },
+    { on: a, next: b, say: `Preview picks the next stop, "${words[b].textContent}"; short words in between are skipped.` },
+    { on: b, next: null, say: "The jump itself takes about 30 ms, and nothing is read during it." }));
+  let i = -1, timer = null;
+  const show = () => { const s = steps[i]; words.forEach((w, k) => { w.classList.toggle("on", k === s.on); w.classList.toggle("next", k === s.next); }); text.textContent = s.say; };
+  const step = () => { i = (i + 1) % steps.length; show(); };
+  d.querySelector("[data-step]").addEventListener("click", step);
+  const play = d.querySelector("[data-play]");
+  play.addEventListener("click", () => {
+    if (timer) { clearInterval(timer); timer = null; play.textContent = "Play"; play.setAttribute("aria-pressed", false); return; }
+    step(); timer = setInterval(step, 1400); play.textContent = "Stop"; play.setAttribute("aria-pressed", true);
+  });
+})();
+
+// Feature sketch: step through the four frames, unless motion is reduced.
+(function () {
+  const frames = [...document.querySelectorAll("#flow .frame")];
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { frames.forEach(f => f.classList.add("on")); return; }
+  let i = 0; const show = () => frames.forEach((f, k) => f.classList.toggle("on", k === i));
+  show(); setInterval(() => { i = (i + 1) % frames.length; show(); }, 2200);
+})();
+</script>
+</body>
+</html>

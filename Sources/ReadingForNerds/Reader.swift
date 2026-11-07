@@ -32,15 +32,18 @@ final class ReaderPanel: NSPanel {
     }
 }
 
-/// Plays words one at a time and handles the keys while the panel is up.
+/// The pace comes from a timer, or, with the voice on, from the voice reaching each word.
 @MainActor
 final class Reader {
     private let panel = ReaderPanel()
     private let view = ReaderView()
+    private let speaker = Speaker()
     private var words: [Word] = []
     private var index = 0
     private var timer: Timer?
     private var recording: ((Shortcut?) -> Void)?
+    /// Where and when the voice last started, to measure how fast it is really going.
+    private var voiceStart: (index: Int, time: Date)?
 
     var isOpen: Bool { panel.isVisible }
 
@@ -49,10 +52,17 @@ final class Reader {
         set { UserDefaults.standard.set(min(max(newValue, 100), 1500), forKey: "wpm") }
     }
 
+    private var voiceOn: Bool {
+        get { UserDefaults.standard.bool(forKey: "voice") }
+        set { UserDefaults.standard.set(newValue, forKey: "voice") }
+    }
+
     init() {
         panel.contentView = view
         panel.onKey = { [weak self] in self?.key($0) }
         panel.onResignKey = { [weak self] in self?.close() }
+        speaker.onWord = { [weak self] in self?.voiceReached($0) }
+        speaker.onFinish = { [weak self] in self?.finishSoon() }
     }
 
     func read(_ text: String) {
@@ -62,11 +72,11 @@ final class Reader {
         view.paused = false
         open()
         render()
-        schedule(extra: 0.4) // a beat for the eye to land on the first word
+        play(extra: 0.4) // a beat for the eye to land on the first word
     }
 
     func show(_ title: String, detail: String? = nil) {
-        stop()
+        halt()
         view.content = .message(title, detail: detail)
         open()
         timer = .scheduledTimer(withTimeInterval: 2.5, repeats: false) { [weak self] _ in
@@ -76,13 +86,13 @@ final class Reader {
 
     func record(_ done: @escaping (Shortcut?) -> Void) {
         show("Press the new shortcut", detail: "Use ⌃, ⌥ or ⌘ with a key.  Esc cancels.")
-        stop()
+        halt()
         recording = done
     }
 
     func close() {
         guard panel.isVisible else { return }
-        stop()
+        halt()
         panel.orderOut(nil)
         finishRecording(nil)
     }
@@ -98,12 +108,29 @@ final class Reader {
 
     private func render() {
         view.content = .word(words[index])
-        view.wpm = wpm
         view.progress = Double(index + 1) / Double(words.count)
+        view.status = voiceOn ? voiceStatus : "\(wpm) wpm"
     }
 
-    private func schedule(extra: TimeInterval = 0) {
-        stop()
+    /// The voice's real speed once it has said enough words to measure; its rate setting has no wpm scale.
+    private var voiceStatus: String {
+        guard let start = voiceStart, index - start.index >= 6 else { return "Voice" }
+        let measured = Double(index - start.index) / Date().timeIntervalSince(start.time) * 60
+        return "Voice · \(Int((measured / 10).rounded()) * 10) wpm"
+    }
+
+    private func play(extra: TimeInterval = 0) {
+        halt()
+        if voiceOn {
+            voiceStart = (index, Date())
+            speaker.speak(words, from: index)
+        } else {
+            schedule(extra: extra)
+        }
+        render()
+    }
+
+    private func schedule(extra: TimeInterval) {
         let seconds = 60 / Double(wpm) * words[index].weight + extra
         timer = .scheduledTimer(withTimeInterval: seconds, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated { self?.advance() }
@@ -114,12 +141,24 @@ final class Reader {
         guard index + 1 < words.count else { return close() }
         index += 1
         render()
-        schedule()
+        schedule(extra: 0)
     }
 
-    private func stop() {
+    private func voiceReached(_ word: Int) {
+        index = min(word, words.count - 1)
+        render()
+    }
+
+    private func finishSoon() {
+        timer = .scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { self?.close() }
+        }
+    }
+
+    private func halt() {
         timer?.invalidate()
         timer = nil
+        speaker.stop()
     }
 
     private func finishRecording(_ shortcut: Shortcut?) {
@@ -142,16 +181,24 @@ final class Reader {
             close()
         case kVK_Space:
             view.paused.toggle()
-            view.paused ? stop() : schedule()
+            view.paused ? halt() : play()
+        case kVK_ANSI_V:
+            voiceOn.toggle()
+            view.paused ? render() : play()
         case kVK_UpArrow, kVK_DownArrow:
-            wpm += Int(event.keyCode) == kVK_UpArrow ? 25 : -25
-            view.wpm = wpm
+            let up = Int(event.keyCode) == kVK_UpArrow
+            if voiceOn {
+                speaker.rate += up ? 0.05 : -0.05
+                if !view.paused { play() } // a voice's rate is fixed per utterance, so restart at this word
+            } else {
+                wpm += up ? 25 : -25
+                render()
+            }
         case kVK_LeftArrow, kVK_RightArrow:
             index = Int(event.keyCode) == kVK_LeftArrow
                 ? Reading.previousSentence(from: index, in: words)
                 : Reading.nextSentence(from: index, in: words)
-            render()
-            if !view.paused { schedule(extra: 0.3) }
+            view.paused ? render() : play(extra: 0.3)
         default:
             break
         }

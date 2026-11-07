@@ -46,15 +46,22 @@ To uninstall, quit from the menu bar and delete `~/Applications/ReadingForNerds.
 | Space | Pause or resume |
 | ↑ / ↓ | Speed up or slow down by 25 wpm |
 | ← / → | Jump back or forward a sentence |
+| V | Turn the voice on or off |
 | Esc | Close |
+
+With the voice on, words appear as the voice says them, and ↑ / ↓ change how fast it talks.
+The footer shows the speed it is actually reaching.
+The voice is the best one installed for your system language.
+For a much better one, download a Premium or Enhanced voice in System Settings → Accessibility → Spoken Content → System Voice → Manage Voices, then relaunch the app.
 
 To change the hotkey, click the glasses icon in the menu bar, choose **Change Shortcut…**, and press the new combination.
 
 ## How it works
 
-No dependencies: three files, one per layer.
+No dependencies: one file per layer.
 
 - `Hotkey.swift`: Carbon's `RegisterEventHotKey`, the one macOS API that claims a single key combination system-wide without a permission.
 - `Selection.swift`: posts ⌘C to the front app and restores your clipboard; copy works in nearly every app, where the Accessibility API's selected text does not.
+- `Speaker.swift`: macOS's own voices (`AVSpeechSynthesizer`), which report each word as they start it, so the voice sets the pace.
 - `Reader.swift` and `ReaderView.swift`: a floating panel that takes keys without stealing focus, and draws each word around its pivot.
 - `ReaderCore`: the tested rules for where the pivot falls and how long each word stays up. Run them with `make test`.

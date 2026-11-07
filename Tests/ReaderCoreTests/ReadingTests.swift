@@ -38,3 +38,16 @@ import Testing
     #expect(Reading.nextSentence(from: 1, in: words) == 3)
     #expect(Reading.nextSentence(from: 7, in: words) == 7)
 }
+
+@Test func spokenRangesMapBackToWords() {
+    let words = Reading.words(in: "\"Hello,\" said the well-known nerd.")
+    let spoken = SpokenText(words[...])
+    #expect(spoken.text == "\"Hello,\" said the well-known nerd.")
+    #expect(spoken.word(at: 1) == 0)   // the voice starts at H, after the quote
+    #expect(spoken.word(at: 9) == 1)   // said
+    #expect(spoken.word(at: 23) == 3)  // "known", the second half of well-known
+    #expect(spoken.word(at: 29) == 4)  // nerd
+
+    let rest = SpokenText(words[3...])
+    #expect(rest.word(at: 0) == 0)
+}

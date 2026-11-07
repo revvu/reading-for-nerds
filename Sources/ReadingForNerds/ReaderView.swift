@@ -9,7 +9,7 @@ final class ReaderView: NSView {
     }
 
     var content: Content = .message("", detail: nil) { didSet { needsDisplay = true } }
-    var wpm = 0 { didSet { needsDisplay = true } }
+    var status = "" { didSet { needsDisplay = true } }
     var progress = 0.0 { didSet { needsDisplay = true } }
     var paused = false { didSet { needsDisplay = true } }
 
@@ -71,7 +71,7 @@ final class ReaderView: NSView {
 
     private func drawFooter() {
         let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular)
-        styled("\(wpm) wpm", font, .tertiaryLabelColor).draw(at: NSPoint(x: 20, y: 14))
+        styled(status, font, .tertiaryLabelColor).draw(at: NSPoint(x: 20, y: 14))
         if paused {
             let label = styled("Paused · Space to resume", font, .secondaryLabelColor)
             label.draw(at: NSPoint(x: bounds.width - 20 - label.size().width, y: 14))

@@ -71,3 +71,27 @@ public enum Reading {
         return min(end + 1, words.count - 1)
     }
 }
+
+/// Words joined into one string for a speech voice, with each word's start, so the voice's
+/// "now saying this range" reports map back to the word on screen.
+public struct SpokenText: Sendable {
+    public let text: String
+    private let starts: [Int] // UTF-16 offsets, the unit speech ranges use
+
+    public init(_ words: ArraySlice<Word>) {
+        var starts: [Int] = []
+        var offset = 0
+        for word in words {
+            starts.append(offset)
+            offset += word.text.utf16.count + 1
+        }
+        self.text = words.map(\.text).joined(separator: " ")
+        self.starts = starts
+    }
+
+    /// Position, within these words, of the word holding `offset`. A voice may split one word
+    /// into several ranges ("well-known"); every part maps to the same word.
+    public func word(at offset: Int) -> Int {
+        starts.lastIndex { $0 <= offset } ?? 0
+    }
+}
